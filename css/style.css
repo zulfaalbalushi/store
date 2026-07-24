@@ -1,0 +1,178 @@
+/* ==========================================================================
+   Baytna — Base Stylesheet
+   Cozy, warm, pastel brand for a home-cooked food marketplace.
+   This file: fonts, design tokens (CSS variables), reset, base
+   element styles, layout helpers, and responsive breakpoints.
+   Component styles (buttons, cards, badges, etc.) live in components.css.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Fonts
+   Poppins = primary UI font (English copy).
+   Tajawal = Arabic fallback so Arabic text gets correct glyphs/shaping
+   instead of falling back to a system font that doesn't match the brand.
+   Loaded here via @import so the whole site gets fonts from one place;
+   if you add a shared <head> later, swap this for <link rel="preconnect">
+   + <link href="...">, which loads slightly faster than @import.
+   -------------------------------------------------------------------------- */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Tajawal:wght@400;500;700&display=swap');
+
+/* --------------------------------------------------------------------------
+   2. Design tokens
+   Every color, spacing, radius, and shadow value used across the site
+   should come from here. Don't hardcode hex codes or pixel values in
+   other files — reference these variables so the whole theme can be
+   retuned in one place.
+   -------------------------------------------------------------------------- */
+:root {
+  /* Colors */
+  --bg: #F4F2E4;
+  --surface: #FFFFFF;
+  --surface-alt: #F4E3CE;
+  --primary: #7CC9A6;
+  --primary-soft: #B5E4D0;
+  --on-primary: #FFFFFF;
+  --accent: #F4DDDD;
+  --on-accent: #A15A63;
+  --lilac: #C7CBF0;
+  --text: #4B4552;
+  --text-muted: #8A8290;
+  --border: #E9E4D8;
+  --error: #D98A8A;
+
+  /* Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+
+  /* Spacing scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 16px;
+  --space-4: 24px;
+  --space-5: 32px;
+  --space-6: 48px;
+
+  /* Shadow */
+  --shadow-soft: 0 4px 16px rgba(75, 69, 82, 0.08);
+}
+
+/* --------------------------------------------------------------------------
+   3. Reset
+   Minimal reset so margins/padding and box-sizing behave consistently
+   across browsers before any component styling is applied.
+   -------------------------------------------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+img,
+picture,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* --------------------------------------------------------------------------
+   4. Base element styles
+   -------------------------------------------------------------------------- */
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: 'Poppins', 'Tajawal', sans-serif;
+  font-weight: 400;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+h1, h2, h3, h4 {
+  color: var(--text);
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+h1 { font-size: 2.25rem; }
+h2 { font-size: 1.75rem; }
+h3 { font-size: 1.375rem; }
+h4 { font-size: 1.125rem; }
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* --------------------------------------------------------------------------
+   5. Utilities
+   -------------------------------------------------------------------------- */
+
+/* Arabic text: switch direction/alignment so Arabic copy reads naturally
+   next to LTR layout chrome. Apply to any element wrapping Arabic content. */
+.ar {
+  direction: rtl;
+  text-align: right;
+  font-family: 'Tajawal', 'Poppins', sans-serif;
+}
+
+/* --------------------------------------------------------------------------
+   6. Layout helpers
+   -------------------------------------------------------------------------- */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin-inline: auto;
+  padding-inline: var(--space-4);
+}
+
+/* Simple responsive grid for cards (product listings, category tiles, etc).
+   Column count steps down at each breakpoint below. */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-4);
+}
+
+/* --------------------------------------------------------------------------
+   7. Responsive breakpoints
+   Desktop-first steps at 1024px (small desktop / large tablet),
+   768px (tablet), and 480px (mobile).
+   -------------------------------------------------------------------------- */
+@media (max-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding-inline: var(--space-3);
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
+  }
+
+  h1 { font-size: 1.875rem; }
+  h2 { font-size: 1.5rem; }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding-inline: var(--space-2);
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  h1 { font-size: 1.625rem; }
+  h2 { font-size: 1.375rem; }
+}

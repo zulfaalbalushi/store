@@ -1,0 +1,148 @@
+/* ==========================================================================
+   Baytna — Components
+   Reusable UI pieces: buttons, cards, badges, chips, form inputs.
+   Depends on the tokens defined in style.css (:root variables) —
+   load style.css before this file.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Buttons
+   -------------------------------------------------------------------------- */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--primary);
+  color: var(--on-primary);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-4);
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: filter 0.15s ease, transform 0.15s ease;
+}
+
+.btn-primary:hover {
+  /* Slightly darker than --primary without needing a second color token */
+  filter: brightness(0.93);
+}
+
+.btn-primary:active {
+  transform: translateY(1px);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+  color: var(--primary);
+  border: 1.5px solid var(--primary);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-4);
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.btn-secondary:hover {
+  background-color: var(--primary);
+  color: var(--on-primary);
+}
+
+/* --------------------------------------------------------------------------
+   Cards
+   Used for product listings, cook profiles, etc.
+   -------------------------------------------------------------------------- */
+.card {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft);
+  padding: var(--space-4);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(75, 69, 82, 0.12);
+}
+
+/* --------------------------------------------------------------------------
+   Badges
+   Small status/label pill, e.g. "New", "Best seller".
+   -------------------------------------------------------------------------- */
+.badge {
+  display: inline-block;
+  background-color: var(--accent);
+  color: var(--on-accent);
+  border-radius: 999px;
+  padding: var(--space-1) var(--space-2);
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1;
+}
+
+/* --------------------------------------------------------------------------
+   Chips
+   Toggleable pills for category filters. Add/remove the .active class
+   with JS when a chip is selected.
+   -------------------------------------------------------------------------- */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  background-color: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: var(--space-1) var(--space-3);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.chip.active {
+  background-color: var(--primary-soft);
+  border-color: var(--primary-soft);
+  color: var(--text);
+}
+
+/* --------------------------------------------------------------------------
+   Form inputs
+   -------------------------------------------------------------------------- */
+.input,
+textarea {
+  width: 100%;
+  background-color: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
+  font-family: inherit;
+  font-size: 1rem;
+  transition: border-color 0.15s ease;
+}
+
+.input:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 6rem;
+}
+
+/* Error message shown below an invalid field */
+.error-text {
+  display: block;
+  color: var(--error);
+  font-size: 0.8125rem;
+  margin-top: var(--space-1);
+}
