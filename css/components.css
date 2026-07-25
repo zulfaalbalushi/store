@@ -317,3 +317,80 @@ textarea {
     gap: var(--space-3);
   }
 }
+
+/* --------------------------------------------------------------------------
+   Dish card
+   Extends .card — pair both classes on the same element:
+   <article class="card dish-card">. Markup is built by js/dishCard.js.
+   -------------------------------------------------------------------------- */
+.dish-card {
+  overflow: hidden;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.dish-card--unavailable {
+  opacity: 0.6;
+}
+
+.dish-card__photo-wrap {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  /* Doubles as the "soft placeholder" when a dish has no photo yet */
+  background-color: var(--surface-alt);
+}
+
+.dish-card__photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.dish-card__badge {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-2);
+}
+
+.dish-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-4);
+}
+
+.dish-card__name {
+  color: var(--text);
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.dish-card__cook {
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+}
+
+.dish-card__price {
+  color: var(--text);
+  font-weight: 600;
+  font-size: 1.0625rem;
+  margin-top: var(--space-1);
+}
+
+.dish-card__action {
+  width: 100%;
+  gap: var(--space-1);
+  margin-top: var(--space-3);
+}
+
+.dish-card__sold-out {
+  margin-top: var(--space-3);
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  background-color: var(--surface-alt);
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-align: center;
+}
