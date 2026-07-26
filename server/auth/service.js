@@ -1,6 +1,7 @@
 import argon2 from 'argon2';
 
 import { conflict, unauthorized, validationError } from '../http/errors.js';
+import { createDefaultCategories } from '../menu/defaults.js';
 import { createSession } from './session.js';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -75,6 +76,7 @@ export async function registerStoreOwner(database, input, sessionSecret) {
         day,
       );
     }
+    createDefaultCategories(database, businessId);
 
     return { businessId, businessName: values.businessName, email: values.email, userId };
   });

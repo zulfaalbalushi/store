@@ -100,6 +100,7 @@ test('server serves the Store-owner portal and removes the old admin route', asy
   const handler = createRequestHandler({ logger: silentLogger });
   const storeResponse = await request(handler, '/pages/store/dashboard.html');
   const businessResponse = await request(handler, '/pages/store/business.html');
+  const menuResponse = await request(handler, '/pages/store/menu.html');
   const oldAdminResponse = await request(handler, '/pages/admin/dashboard.html');
 
   assert.equal(storeResponse.status, 200);
@@ -107,6 +108,8 @@ test('server serves the Store-owner portal and removes the old admin route', asy
   assert.doesNotMatch(storeResponse.body, />Businesses</);
   assert.equal(businessResponse.status, 200);
   assert.match(businessResponse.body, /Operating hours/);
+  assert.equal(menuResponse.status, 200);
+  assert.match(menuResponse.body, /Your dishes/);
   assert.equal(oldAdminResponse.status, 404);
 });
 

@@ -51,7 +51,15 @@ their own business.
 - `unavailable`
 - `archived`
 
-Dish workflow rules will be enforced when the Menu module is implemented.
+Dish workflow rules are enforced by the Store Menu service.
+
+Implemented owner transitions:
+
+- `draft` → `active` or `unavailable`
+- `active` → `unavailable`
+- `unavailable` → `active` or `draft`
+- Any non-archived state → `archived`
+- `archived` is terminal in the Store portal
 
 ## Order statuses
 

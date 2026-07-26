@@ -14,11 +14,11 @@ test('openDatabase creates a healthy SQLite database', async () => {
     const database = await openDatabase(databasePath);
     assert.equal(database.checkHealth(), true);
     assert.equal(database.get('PRAGMA foreign_keys').foreign_keys, 1);
-    assert.equal(database.get('SELECT COUNT(*) AS count FROM schema_migrations').count, 1);
+    assert.equal(database.get('SELECT COUNT(*) AS count FROM schema_migrations').count, 3);
     database.close();
 
     const reopenedDatabase = await openDatabase(databasePath);
-    assert.equal(reopenedDatabase.get('SELECT COUNT(*) AS count FROM schema_migrations').count, 1);
+    assert.equal(reopenedDatabase.get('SELECT COUNT(*) AS count FROM schema_migrations').count, 3);
     assert.ok(
       reopenedDatabase.get(
         "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'businesses'",

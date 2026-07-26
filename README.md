@@ -82,6 +82,20 @@ Completed profiles can be submitted for platform review. Owners can view their a
 but cannot approve, reject, or suspend their own business. All My Business requests resolve the
 business through the authenticated session; the browser does not provide a trusted business ID.
 
+## Menu
+
+The Store **Menu** page supports:
+
+- Store-owned categories with safe rename and deletion rules
+- Default categories for new and existing local Stores
+- Dish creation and editing
+- Integer-baisa prices displayed with three OMR decimal places
+- Draft, active, unavailable, and archived states
+- Search, category/status filters, sorting, and pagination
+- CSRF-protected mutations and cross-business ownership checks
+
+Dish images are intentionally deferred until upload storage is selected.
+
 ## API
 
 Check server and database readiness:

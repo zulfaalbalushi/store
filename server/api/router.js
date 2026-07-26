@@ -11,6 +11,17 @@ import { getOwnedBusiness, submitOwnedBusiness, updateOwnedBusiness } from '../b
 import { readJsonBody } from '../http/body.js';
 import { methodNotAllowed } from '../http/errors.js';
 import { sendSuccess } from '../http/responses.js';
+import {
+  archiveDish,
+  createCategory,
+  createDish,
+  deleteCategory,
+  getDish,
+  listCategories,
+  listDishes,
+  updateCategory,
+  updateDish,
+} from '../menu/service.js';
 
 function requireMethod(request, method) {
   if (request.method !== method) throw methodNotAllowed();
@@ -107,6 +118,93 @@ export function createApiRouter({ config, database }) {
       requireCsrf(request, session);
       sendSuccess(response, { business: submitOwnedBusiness(database, session) });
       return true;
+    }
+
+    if (requestUrl.pathname === '/api/v1/store/categories') {
+      const session = requireStoreSession(database, request, config.sessionSecret);
+
+      if (request.method === 'GET') {
+        sendSuccess(response, { categories: listCategories(database, session) });
+        return true;
+      }
+
+      if (request.method === 'POST') {
+        requireCsrf(request, session);
+        const input = await readJsonBody(request);
+        sendSuccess(response, { category: createCategory(database, session, input) }, 201);
+        return true;
+      }
+
+      throw methodNotAllowed();
+    }
+
+    const categoryMatch = requestUrl.pathname.match(/^\/api\/v1\/store\/categories\/(\d+)$/);
+    if (categoryMatch) {
+      const session = requireStoreSession(database, request, config.sessionSecret);
+      requireCsrf(request, session);
+
+      if (request.method === 'PUT') {
+        const input = await readJsonBody(request);
+        sendSuccess(response, {
+          category: updateCategory(database, session, categoryMatch[1], input),
+        });
+        return true;
+      }
+
+      if (request.method === 'DELETE') {
+        sendSuccess(response, {
+          result: deleteCategory(database, session, categoryMatch[1]),
+        });
+        return true;
+      }
+
+      throw methodNotAllowed();
+    }
+
+    if (requestUrl.pathname === '/api/v1/store/dishes') {
+      const session = requireStoreSession(database, request, config.sessionSecret);
+
+      if (request.method === 'GET') {
+        sendSuccess(response, listDishes(database, session, requestUrl.searchParams));
+        return true;
+      }
+
+      if (request.method === 'POST') {
+        requireCsrf(request, session);
+        const input = await readJsonBody(request);
+        sendSuccess(response, { dish: createDish(database, session, input) }, 201);
+        return true;
+      }
+
+      throw methodNotAllowed();
+    }
+
+    const archiveMatch = requestUrl.pathname.match(/^\/api\/v1\/store\/dishes\/(\d+)\/archive$/);
+    if (archiveMatch) {
+      requireMethod(request, 'POST');
+      const session = requireStoreSession(database, request, config.sessionSecret);
+      requireCsrf(request, session);
+      sendSuccess(response, { dish: archiveDish(database, session, archiveMatch[1]) });
+      return true;
+    }
+
+    const dishMatch = requestUrl.pathname.match(/^\/api\/v1\/store\/dishes\/(\d+)$/);
+    if (dishMatch) {
+      const session = requireStoreSession(database, request, config.sessionSecret);
+
+      if (request.method === 'GET') {
+        sendSuccess(response, { dish: getDish(database, session, dishMatch[1]) });
+        return true;
+      }
+
+      if (request.method === 'PUT') {
+        requireCsrf(request, session);
+        const input = await readJsonBody(request);
+        sendSuccess(response, { dish: updateDish(database, session, dishMatch[1], input) });
+        return true;
+      }
+
+      throw methodNotAllowed();
     }
 
     return false;

@@ -132,6 +132,14 @@ test('Store registration creates a hashed account, business, and secure session'
       payload.data.account.businessId,
     );
     assert.equal(hours.count, 7);
+    const categories = application.database.all(
+      'SELECT name FROM categories WHERE business_id = ? ORDER BY name',
+      payload.data.account.businessId,
+    );
+    assert.deepEqual(
+      categories.map((category) => category.name),
+      ['Appetizers', 'Breads', 'Drinks', 'Main dishes', 'Sweets & Desserts'],
+    );
   } finally {
     await application.close();
   }
@@ -338,6 +346,107 @@ test('Customer sessions cannot access Store resources', async () => {
 
     assert.equal(response.status, 401);
     assert.equal(json(response).error.code, 'UNAUTHORIZED');
+  } finally {
+    await application.close();
+  }
+});
+
+test('Menu API enforces CSRF and ownership for categories and dishes', async () => {
+  const application = await testApplication();
+
+  try {
+    const firstRegistration = await performRequest(
+      application.handler,
+      '/api/v1/auth/store/register',
+      {
+        method: 'POST',
+        body: {
+          fullName: 'First Owner',
+          businessName: 'First Kitchen',
+          email: 'first-menu@example.com',
+          password: 'strong-password',
+        },
+      },
+    );
+    const firstPayload = json(firstRegistration);
+    const firstCookie = cookieFrom(firstRegistration);
+
+    const missingCsrf = await performRequest(application.handler, '/api/v1/store/categories', {
+      method: 'POST',
+      headers: { cookie: firstCookie },
+      body: { name: 'Mains' },
+    });
+    assert.equal(missingCsrf.status, 403);
+
+    const categoryResponse = await performRequest(application.handler, '/api/v1/store/categories', {
+      method: 'POST',
+      headers: {
+        cookie: firstCookie,
+        'x-csrf-token': firstPayload.data.csrfToken,
+      },
+      body: { name: 'Mains' },
+    });
+    const categoryId = json(categoryResponse).data.category.id;
+    assert.equal(categoryResponse.status, 201);
+
+    const dishResponse = await performRequest(application.handler, '/api/v1/store/dishes', {
+      method: 'POST',
+      headers: {
+        cookie: firstCookie,
+        'x-csrf-token': firstPayload.data.csrfToken,
+      },
+      body: {
+        categoryId,
+        description: 'Traditional Omani dish',
+        name: 'Shuwa',
+        priceBaisa: 4500,
+        status: 'active',
+      },
+    });
+    const dishId = json(dishResponse).data.dish.id;
+    assert.equal(dishResponse.status, 201);
+
+    const listResponse = await performRequest(
+      application.handler,
+      '/api/v1/store/dishes?status=active&search=shuwa',
+      { headers: { cookie: firstCookie } },
+    );
+    assert.equal(listResponse.status, 200);
+    assert.equal(json(listResponse).data.dishes[0].id, dishId);
+
+    const protectedCategory = await performRequest(
+      application.handler,
+      `/api/v1/store/categories/${categoryId}`,
+      {
+        method: 'DELETE',
+        headers: {
+          cookie: firstCookie,
+          'x-csrf-token': firstPayload.data.csrfToken,
+        },
+      },
+    );
+    assert.equal(protectedCategory.status, 409);
+
+    const secondRegistration = await performRequest(
+      application.handler,
+      '/api/v1/auth/store/register',
+      {
+        method: 'POST',
+        body: {
+          fullName: 'Second Owner',
+          businessName: 'Second Kitchen',
+          email: 'second-menu@example.com',
+          password: 'strong-password',
+        },
+      },
+    );
+    const secondCookie = cookieFrom(secondRegistration);
+    const crossBusinessDish = await performRequest(
+      application.handler,
+      `/api/v1/store/dishes/${dishId}`,
+      { headers: { cookie: secondCookie } },
+    );
+    assert.equal(crossBusinessDish.status, 404);
   } finally {
     await application.close();
   }
