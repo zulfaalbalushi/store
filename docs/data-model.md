@@ -71,7 +71,17 @@ Implemented owner transitions:
 - `rejected`
 - `cancelled`
 
-The permitted Store-owner transitions will be enforced when the Orders module is implemented.
+Implemented Store-owner transitions:
+
+- `pending` → `accepted` or `rejected`
+- `accepted` → `preparing` or `cancelled`
+- `preparing` → `ready` or `cancelled`
+- `ready` → `completed`
+- `completed`, `rejected`, and `cancelled` are terminal
+
+Rejection and cancellation require a reason. Each transition updates the order, writes status
+history, and records an audit event in one transaction. Repeating the current status is
+idempotent and does not duplicate history.
 
 ## Migrations
 

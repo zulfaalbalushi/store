@@ -22,6 +22,7 @@ import {
   updateCategory,
   updateDish,
 } from '../menu/service.js';
+import { getOrder, listOrders, transitionOrder } from '../orders/service.js';
 
 function requireMethod(request, method) {
   if (request.method !== method) throw methodNotAllowed();
@@ -205,6 +206,31 @@ export function createApiRouter({ config, database }) {
       }
 
       throw methodNotAllowed();
+    }
+
+    if (requestUrl.pathname === '/api/v1/store/orders') {
+      requireMethod(request, 'GET');
+      const session = requireStoreSession(database, request, config.sessionSecret);
+      sendSuccess(response, listOrders(database, session, requestUrl.searchParams));
+      return true;
+    }
+
+    const orderStatusMatch = requestUrl.pathname.match(/^\/api\/v1\/store\/orders\/(\d+)\/status$/);
+    if (orderStatusMatch) {
+      requireMethod(request, 'POST');
+      const session = requireStoreSession(database, request, config.sessionSecret);
+      requireCsrf(request, session);
+      const input = await readJsonBody(request);
+      sendSuccess(response, transitionOrder(database, session, orderStatusMatch[1], input));
+      return true;
+    }
+
+    const orderMatch = requestUrl.pathname.match(/^\/api\/v1\/store\/orders\/(\d+)$/);
+    if (orderMatch) {
+      requireMethod(request, 'GET');
+      const session = requireStoreSession(database, request, config.sessionSecret);
+      sendSuccess(response, { order: getOrder(database, session, orderMatch[1]) });
+      return true;
     }
 
     return false;

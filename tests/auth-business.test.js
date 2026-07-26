@@ -451,3 +451,94 @@ test('Menu API enforces CSRF and ownership for categories and dishes', async () 
     await application.close();
   }
 });
+
+test('Orders API enforces CSRF, transitions, and business ownership', async () => {
+  const application = await testApplication();
+
+  try {
+    const firstRegistration = await performRequest(
+      application.handler,
+      '/api/v1/auth/store/register',
+      {
+        method: 'POST',
+        body: {
+          fullName: 'Orders Owner',
+          businessName: 'Orders Kitchen',
+          email: 'orders@example.com',
+          password: 'strong-password',
+        },
+      },
+    );
+    const firstPayload = json(firstRegistration);
+    const firstCookie = cookieFrom(firstRegistration);
+    const order = application.database.run(
+      `INSERT INTO orders
+        (business_id, order_number, subtotal_baisa, delivery_fee_baisa, total_baisa,
+         customer_name, customer_phone, delivery_address)
+       VALUES (?, 'API-1001', 4000, 500, 4500, 'Maha Al Harthi', '+968 9000 1111',
+         'House 4, Al Khoudh')`,
+      firstPayload.data.account.businessId,
+    );
+    const orderId = Number(order.lastInsertRowid);
+    application.database.run(
+      `INSERT INTO order_items
+        (order_id, dish_name, quantity, unit_price_baisa, line_total_baisa)
+       VALUES (?, 'Shuwa meal', 1, 4000, 4000)`,
+      orderId,
+    );
+
+    const list = await performRequest(application.handler, '/api/v1/store/orders?status=pending', {
+      headers: { cookie: firstCookie },
+    });
+    assert.equal(list.status, 200);
+    assert.equal(json(list).data.orders[0].orderNumber, 'API-1001');
+
+    const missingCsrf = await performRequest(
+      application.handler,
+      `/api/v1/store/orders/${orderId}/status`,
+      {
+        method: 'POST',
+        headers: { cookie: firstCookie },
+        body: { status: 'accepted' },
+      },
+    );
+    assert.equal(missingCsrf.status, 403);
+
+    const accepted = await performRequest(
+      application.handler,
+      `/api/v1/store/orders/${orderId}/status`,
+      {
+        method: 'POST',
+        headers: {
+          cookie: firstCookie,
+          'x-csrf-token': firstPayload.data.csrfToken,
+        },
+        body: { status: 'accepted' },
+      },
+    );
+    assert.equal(accepted.status, 200);
+    assert.equal(json(accepted).data.order.status, 'accepted');
+
+    const secondRegistration = await performRequest(
+      application.handler,
+      '/api/v1/auth/store/register',
+      {
+        method: 'POST',
+        body: {
+          fullName: 'Other Owner',
+          businessName: 'Other Kitchen',
+          email: 'other-orders@example.com',
+          password: 'strong-password',
+        },
+      },
+    );
+    const crossBusiness = await performRequest(
+      application.handler,
+      `/api/v1/store/orders/${orderId}`,
+      { headers: { cookie: cookieFrom(secondRegistration) } },
+    );
+    assert.equal(crossBusiness.status, 404);
+  } finally {
+    await application.close();
+  }
+});

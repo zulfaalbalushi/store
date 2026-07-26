@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Manage orders for your Baytna home business." />
+    <title>Orders — Baytna</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/components.css" />
+    <link rel="stylesheet" href="/css/store.css" />
+  </head>
+  <body class="store-body">
+    <div class="store-shell">
+      <aside class="store-sidebar" id="store-sidebar">
+        <a class="store-sidebar__brand" href="/pages/store/dashboard.html">Baytna Store</a>
+
+        <p class="store-sidebar__label">Workspace</p>
+        <nav class="store-nav" aria-label="Store navigation">
+          <a href="/pages/store/dashboard.html">Overview</a>
+          <a href="/pages/store/business.html">My business</a>
+          <a href="/pages/store/menu.html">Menu</a>
+          <a class="active" href="/pages/store/orders.html" aria-current="page">Orders</a>
+          <a href="#" aria-disabled="true">Availability</a>
+        </nav>
+
+        <p class="store-sidebar__label">Account</p>
+        <nav class="store-nav" aria-label="Store account navigation">
+          <a href="#" aria-disabled="true">Documents</a>
+          <a href="#" aria-disabled="true">Profile &amp; settings</a>
+        </nav>
+
+        <div class="store-sidebar__footer">
+          <p class="store-user-email" id="store-user-email">Store account</p>
+          <button class="store-signout" id="store-signout" type="button">Sign out</button>
+        </div>
+      </aside>
+
+      <main class="store-main">
+        <header class="store-header">
+          <button
+            class="store-menu-button"
+            id="store-menu-button"
+            type="button"
+            aria-controls="store-sidebar"
+            aria-expanded="false"
+          >
+            Menu
+          </button>
+          <p class="store-header__context">Store management</p>
+          <p class="store-status">Connected</p>
+        </header>
+
+        <div class="store-content">
+          <div class="store-heading">
+            <div>
+              <h1>Orders</h1>
+              <p>Review incoming orders and keep their fulfillment status up to date.</p>
+            </div>
+          </div>
+
+          <div class="business-alert" id="orders-message" role="status" hidden></div>
+
+          <section class="orders-panel" aria-labelledby="orders-list-title">
+            <div class="menu-panel__header">
+              <div>
+                <h2 id="orders-list-title">Your orders</h2>
+                <p id="orders-total">Loading orders…</p>
+              </div>
+            </div>
+
+            <form class="order-filters" id="order-filters">
+              <div class="business-field order-filters__search">
+                <label for="order-search">Order number</label>
+                <input class="input" id="order-search" type="search" placeholder="Search orders" />
+              </div>
+              <div class="business-field">
+                <label for="order-status">Status</label>
+                <select class="input" id="order-status">
+                  <option value="all">All statuses</option>
+                  <option value="pending">Pending</option>
+                  <option value="accepted">Accepted</option>
+                  <option value="preparing">Preparing</option>
+                  <option value="ready">Ready</option>
+                  <option value="completed">Completed</option>
+                  <option value="rejected">Rejected</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+              </div>
+              <div class="business-field">
+                <label for="order-date-from">From</label>
+                <input class="input" id="order-date-from" type="date" />
+              </div>
+              <div class="business-field">
+                <label for="order-date-to">To</label>
+                <input class="input" id="order-date-to" type="date" />
+              </div>
+              <div class="business-field">
+                <label for="order-sort">Sort</label>
+                <select class="input" id="order-sort">
+                  <option value="newest">Newest first</option>
+                  <option value="oldest">Oldest first</option>
+                  <option value="total_desc">Total: high to low</option>
+                  <option value="total_asc">Total: low to high</option>
+                </select>
+              </div>
+              <button class="btn-secondary" type="submit">Apply</button>
+            </form>
+
+            <div class="menu-loading" id="orders-loading" role="status">Loading orders…</div>
+            <div class="menu-empty" id="orders-empty" hidden>
+              <strong>No orders found</strong>
+              <p>New orders will appear here when the customer app is connected.</p>
+            </div>
+
+            <div class="order-table-wrap" id="order-table-wrap" hidden>
+              <table class="order-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Order</th>
+                    <th scope="col">Customer</th>
+                    <th scope="col">Placed</th>
+                    <th scope="col">Items</th>
+                    <th scope="col">Total</th>
+                    <th scope="col">Status</th>
+                    <th scope="col"><span class="visually-hidden">Actions</span></th>
+                  </tr>
+                </thead>
+                <tbody id="order-table-body"></tbody>
+              </table>
+            </div>
+
+            <nav class="menu-pagination" id="orders-pagination" aria-label="Order pages" hidden>
+              <button class="btn-secondary" id="orders-previous" type="button">Previous</button>
+              <span id="orders-page-summary">Page 1 of 1</span>
+              <button class="btn-secondary" id="orders-next" type="button">Next</button>
+            </nav>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <dialog class="order-dialog" id="order-dialog" aria-labelledby="order-dialog-title">
+      <article>
+        <header class="order-dialog__header">
+          <div>
+            <p class="business-status-card__eyebrow">Order details</p>
+            <h2 id="order-dialog-title">Order</h2>
+          </div>
+          <button
+            class="dish-dialog__close"
+            id="close-order-dialog"
+            type="button"
+            aria-label="Close"
+          >
+            &times;
+          </button>
+        </header>
+        <div class="order-detail-loading" id="order-detail-loading" role="status">
+          Loading order…
+        </div>
+        <div id="order-detail" hidden>
+          <div class="order-detail__summary">
+            <span class="order-status-badge" id="order-detail-status"></span>
+            <span id="order-detail-created"></span>
+          </div>
+          <section class="order-detail__section">
+            <h3>Fulfillment contact</h3>
+            <dl class="order-detail__contact" id="order-customer"></dl>
+          </section>
+          <section class="order-detail__section">
+            <h3>Items</h3>
+            <div class="order-items" id="order-items"></div>
+            <dl class="order-totals" id="order-totals"></dl>
+          </section>
+          <section class="order-detail__section">
+            <h3>Status history</h3>
+            <ol class="order-history" id="order-history"></ol>
+          </section>
+          <div class="order-actions" id="order-actions"></div>
+        </div>
+      </article>
+    </dialog>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/store.js"></script>
+    <script src="/js/orders.js"></script>
+  </body>
+</html>

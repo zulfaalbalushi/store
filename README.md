@@ -96,6 +96,21 @@ The Store **Menu** page supports:
 
 Dish images are intentionally deferred until upload storage is selected.
 
+## Orders
+
+The Store **Orders** page provides an owner-scoped fulfillment workflow:
+
+- Order-number search, status/date filters, sorting, and pagination
+- Order details with item and price snapshots
+- Only the customer name, phone, and delivery address needed for fulfillment
+- Controlled acceptance, preparation, readiness, completion, rejection, and cancellation
+- Required reasons for rejection and cancellation
+- Transactional history, audit records, CSRF protection, and ownership checks
+
+Orders will appear automatically after this Store backend and the customer backend are connected to
+the same hosted database. While this branch uses local SQLite, test orders must be inserted locally;
+this branch does not create customer orders.
+
 ## API
 
 Check server and database readiness:
