@@ -16,7 +16,7 @@ const sampleDishes = [
   {
     id: 1,
     name: 'Shuwa',
-    cook: 'Umm Khalid',
+    store: 'Bait Al Shuwa',
     price: 4.5,
     image: placeholderPhoto('#B5E4D0'),
     category: 'Mains',
@@ -25,7 +25,7 @@ const sampleDishes = [
   {
     id: 2,
     name: 'Omani Halwa',
-    cook: 'Bait Al Halwa',
+    store: 'Bait Al Halwa',
     price: 2,
     image: placeholderPhoto('#F4DDDD'),
     category: 'Sweets',
@@ -34,7 +34,7 @@ const sampleDishes = [
   {
     id: 3,
     name: 'Khubz Raqaq',
-    cook: 'Umm Said',
+    store: 'Bait Al Khubz',
     price: 1.2,
     image: null,
     category: 'Bread',
@@ -43,7 +43,7 @@ const sampleDishes = [
   {
     id: 4,
     name: 'Mishkak',
-    cook: 'Abu Yaqoub',
+    store: 'Bait Al Jabal',
     price: 3.25,
     image: placeholderPhoto('#C7CBF0'),
     category: 'Grills',
@@ -52,7 +52,7 @@ const sampleDishes = [
   {
     id: 5,
     name: 'Harees',
-    cook: 'Umm Aflah',
+    store: 'Bait Al Harees',
     price: 2.75,
     image: null,
     category: 'Mains',
@@ -61,7 +61,7 @@ const sampleDishes = [
   {
     id: 6,
     name: 'Luqaimat',
-    cook: 'Umm Zainab',
+    store: 'Bait Al Luqaimat',
     price: 1.8,
     image: placeholderPhoto('#B5E4D0'),
     category: 'Sweets',

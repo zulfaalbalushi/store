@@ -1,13 +1,13 @@
 /**
  * Builds the HTML for one dish card.
- * dish = { id, name, cook, price, image, category, isAvailable }
+ * dish = { id, name, store, price, image, category, isAvailable }
  *
  * Usage: loop over an array of dishes and join the results into a
  * container (e.g. an element with the .grid class):
  *   grid.innerHTML = dishes.map(createDishCard).join('');
  */
 function createDishCard(dish) {
-  const { id, name, cook, price, image, category, isAvailable } = dish;
+  const { id, name, store, price, image, category, isAvailable } = dish;
 
   const photo = image
     ? `<img class="dish-card__photo" src="${escapeHtml(image)}" alt="${escapeHtml(name)}">`
@@ -34,7 +34,7 @@ function createDishCard(dish) {
       </div>
       <div class="dish-card__body">
         <p class="dish-card__name">${escapeHtml(name)}</p>
-        <p class="dish-card__cook">by ${escapeHtml(cook)}</p>
+        <p class="dish-card__store">from ${escapeHtml(store)}</p>
         <p class="dish-card__price">${priceLabel}</p>
         ${action}
       </div>
@@ -42,7 +42,7 @@ function createDishCard(dish) {
   `;
 }
 
-/** Escapes text pulled from dish data before it's dropped into HTML (dish/cook names come from home cooks, so treat them as untrusted input). */
+/** Escapes text pulled from dish data before it's dropped into HTML (dish/store names come from home stores, so treat them as untrusted input). */
 function escapeHtml(value) {
   return String(value)
     .replace(/&/g, '&amp;')
