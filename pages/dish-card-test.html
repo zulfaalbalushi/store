@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Baytna — Dish Card Test</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <style>
+    /* Page-specific spacing for this test page only */
+    main.container {
+      padding-block: var(--space-6);
+    }
+    main.container p {
+      color: var(--text-muted);
+      margin-block: var(--space-2) var(--space-4);
+    }
+  </style>
+</head>
+<body>
+  <div data-include="/pages/partials/navbar.html"></div>
+
+  <main class="container">
+    <h1>Dish Card Test</h1>
+    <p>Sample dish cards rendered from js/sampleDishes.js via js/dishCard.js.</p>
+    <div class="grid" id="dish-grid"></div>
+  </main>
+
+  <div data-include="/pages/partials/footer.html"></div>
+
+  <script src="/js/sampleDishes.js"></script>
+  <script src="/js/dishCard.js"></script>
+  <script src="/js/include.js"></script>
+  <script>
+    document.getElementById('dish-grid').innerHTML = sampleDishes.map(createDishCard).join('');
+  </script>
+</body>
+</html>
