@@ -7,7 +7,7 @@ standalone full-stack Store-owner portal and the shared Customer/Store authentic
 
 - Vanilla HTML, CSS, and browser JavaScript
 - Node.js native HTTP server
-- SQLite through Node's built-in `node:sqlite` module
+- SQLite through Node's built-in `node:sqlite` module, or PostgreSQL through `pg`
 - Argon2id password hashing
 - Native Node test runner
 - ESLint and Prettier as development-only dependencies
@@ -21,7 +21,7 @@ and API response contract.
 - Node.js 24 or newer
 - npm
 
-No separate database installation is required for local development.
+No separate database installation is required for the default SQLite development setup.
 
 ## First-time setup
 
@@ -58,6 +58,46 @@ To run without file watching:
 ```sh
 npm start
 ```
+
+## Supabase/PostgreSQL
+
+The Store portal can use PostgreSQL without changing or replacing tables belonging to another
+application in the same database. Its tables and migration history live in the isolated
+`store_portal` schema; existing `public.users`, `public.listings`, `public.orders`, and
+`public.order_items` tables are not used or modified.
+
+For a persistent Node server, copy the direct connection string from Supabase when IPv6 is
+available, or the Session pooler string when IPv4 is required. In `.env`, comment out
+`BAYTNA_DATABASE_PATH` and set:
+
+```sh
+BAYTNA_DATABASE_URL=postgresql://...
+BAYTNA_DATABASE_CA_PATH=/absolute/path/to/prod-supabase.cer
+```
+
+Do not commit or share the connection string. Prefer a dedicated PostgreSQL login with only the
+permissions the Store service needs. A privileged migration connection can be supplied separately
+as `BAYTNA_MIGRATION_DATABASE_URL`. Download the project CA certificate from the Supabase
+Database SSL Configuration screen and point `BAYTNA_DATABASE_CA_PATH` to that local file so the
+server verifies the certificate chain and hostname.
+
+Coordinate with the database owner, then apply the additive Store migration explicitly:
+
+```sh
+npm run db:migrate:postgres
+```
+
+The application never applies PostgreSQL migrations during normal startup. After the migration
+completes, start the server and check database readiness:
+
+```sh
+npm start
+curl http://127.0.0.1:8000/api/v1/health
+```
+
+Connecting the Store portal to customer-owned tables or translating customer orders into
+Store-fulfillment orders is a separate integration and is intentionally not performed by this
+migration.
 
 ## Authentication
 
@@ -158,13 +198,16 @@ npm run format
 
 ## Environment variables
 
-| Variable                | Required | Description                                     |
-| ----------------------- | -------- | ----------------------------------------------- |
-| `NODE_ENV`              | No       | `development`, `test`, or `production`          |
-| `HOST`                  | No       | Address to bind; defaults to `127.0.0.1`        |
-| `PORT`                  | No       | HTTP port; defaults to `8000`                   |
-| `BAYTNA_DATABASE_PATH`  | Yes      | Path to the SQLite database file                |
-| `BAYTNA_SESSION_SECRET` | Yes      | Private value containing at least 32 characters |
+| Variable                        | Required | Description                                                           |
+| ------------------------------- | -------- | --------------------------------------------------------------------- |
+| `NODE_ENV`                      | No       | `development`, `test`, or `production`                                |
+| `HOST`                          | No       | Address to bind; defaults to `127.0.0.1`                              |
+| `PORT`                          | No       | HTTP port; defaults to `8000`                                         |
+| `BAYTNA_DATABASE_PATH`          | Choice   | SQLite path; mutually exclusive with database URL                     |
+| `BAYTNA_DATABASE_URL`           | Choice   | Server-only PostgreSQL URL; mutually exclusive with SQLite path       |
+| `BAYTNA_DATABASE_CA_PATH`       | No       | Local CA certificate used for strict PostgreSQL TLS verification      |
+| `BAYTNA_MIGRATION_DATABASE_URL` | No       | Optional privileged URL used only by the PostgreSQL migration command |
+| `BAYTNA_SESSION_SECRET`         | Yes      | Private value containing at least 32 characters                       |
 
-The server validates configuration before binding to the port and refuses to start when required
-values are missing or unsafe.
+Exactly one runtime database setting is required. The server validates configuration before
+binding to the port and refuses to start when required values are missing or unsafe.

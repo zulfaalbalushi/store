@@ -6,10 +6,11 @@ export const DEFAULT_CATEGORY_NAMES = Object.freeze([
   'Drinks',
 ]);
 
-export function createDefaultCategories(database, businessId) {
+export async function createDefaultCategories(database, businessId) {
   for (const name of DEFAULT_CATEGORY_NAMES) {
-    database.run(
-      'INSERT OR IGNORE INTO categories (business_id, name) VALUES (?, ?)',
+    await database.run(
+      `INSERT INTO categories (business_id, name) VALUES (?, ?)
+       ON CONFLICT DO NOTHING`,
       businessId,
       name,
     );

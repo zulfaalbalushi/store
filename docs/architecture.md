@@ -6,7 +6,7 @@ Baytna uses a minimal JavaScript stack:
 
 - **Frontend:** the existing vanilla HTML, CSS, and browser JavaScript
 - **Server:** Node.js using the native `node:http` APIs
-- **Database:** SQLite using Node's built-in `node:sqlite` module
+- **Database:** SQLite using Node's built-in `node:sqlite`, or PostgreSQL using `pg`
 - **Password hashing:** Argon2id through the maintained `argon2` package
 - **Tests:** the native `node:test` runner
 - **Development tools:** ESLint and Prettier
@@ -21,13 +21,27 @@ stage.
 - Argon2 is the only third-party production dependency and is used instead of custom password
   cryptography.
 - A single process runs the website and API locally.
-- SQLite is sufficient for the first release and simple to back up and operate.
+- SQLite remains simple for isolated local development, while PostgreSQL supports a shared hosted
+  environment and concurrent writers.
 - Server, domain, and data-access modules remain separate so the database can be replaced later
   without rewriting page code or business rules.
 
-SQLite is not intended to support an unlimited number of concurrent writers. Before multi-server
-deployment or sustained high write volume, reassess the database and plan a migration to a managed
-relational database such as PostgreSQL.
+SQLite is not intended to support an unlimited number of concurrent writers. Hosted or
+multi-server deployments should use PostgreSQL.
+
+## Database boundary
+
+SQLite migrations retain the original unqualified table names. PostgreSQL migrations create and
+use a dedicated `store_portal` schema. The PostgreSQL connection sets its search path to
+`store_portal,public`, so Store queries resolve to Store-owned tables first.
+
+This permits the Store portal to use a Supabase project that already contains customer-team tables
+in `public` without name collisions or accidental reads and writes. Sharing identities, listings,
+or orders across those schemas requires a separately reviewed contract and migration.
+
+PostgreSQL migrations are explicit (`npm run db:migrate:postgres`) and are never run during
+application startup. This prevents an application restart from unexpectedly changing a shared
+database.
 
 ## Directory structure
 
@@ -43,7 +57,7 @@ server/
   auth/               Password, session, CSRF, and rate-limit services
   business/           Ownership-scoped My Business domain service
   config.js          Environment validation
-  database/           SQLite connection, migrations, and schema
+  database/           SQLite/PostgreSQL connections, migrations, and schemas
   index.js           Process entry point
   app.js             HTTP request handler
   http/              HTTP errors and JSON response helpers

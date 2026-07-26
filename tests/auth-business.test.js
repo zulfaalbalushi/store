@@ -425,7 +425,7 @@ test('ownership checks reject a mismatched owner and business pair', async () =>
       },
     });
 
-    assert.throws(
+    await assert.rejects(
       () =>
         getOwnedBusiness(application.database, {
           business_id: json(second).data.account.businessId,
@@ -434,7 +434,7 @@ test('ownership checks reject a mismatched owner and business pair', async () =>
       (error) => error.status === 404,
     );
 
-    assert.throws(
+    await assert.rejects(
       () =>
         getOwnedAccount(application.database, {
           business_id: json(second).data.account.businessId,
@@ -443,7 +443,7 @@ test('ownership checks reject a mismatched owner and business pair', async () =>
       (error) => error.status === 404,
     );
 
-    assert.throws(
+    await assert.rejects(
       () =>
         updateOwnedBusiness(
           application.database,

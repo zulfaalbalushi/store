@@ -29,13 +29,13 @@ function parseCookies(cookieHeader = '') {
   return cookies;
 }
 
-export function createSession(database, userId, secret) {
+export async function createSession(database, userId, secret) {
   const token = randomBytes(32).toString('base64url');
   const csrfToken = randomBytes(24).toString('base64url');
   const expiresAt = new Date(Date.now() + SESSION_DURATION_MILLISECONDS).toISOString();
 
-  database.run('DELETE FROM sessions WHERE expires_at <= ?', new Date().toISOString());
-  database.run(
+  await database.run('DELETE FROM sessions WHERE expires_at <= ?', new Date().toISOString());
+  await database.run(
     'INSERT INTO sessions (user_id, token_hash, csrf_token, expires_at) VALUES (?, ?, ?, ?)',
     userId,
     hashSessionToken(token, secret),
@@ -66,13 +66,13 @@ export function expiredSessionCookie(isProduction) {
   return attributes.join('; ');
 }
 
-export function findSession(database, request, secret) {
+export async function findSession(database, request, secret) {
   const token = parseCookies(request.headers.cookie)[SESSION_COOKIE_NAME];
 
   if (!token) return null;
 
   return (
-    database.get(
+    (await database.get(
       `SELECT
         sessions.id AS session_id,
         sessions.csrf_token,
@@ -89,12 +89,12 @@ export function findSession(database, request, secret) {
       WHERE sessions.token_hash = ? AND sessions.expires_at > ?`,
       hashSessionToken(token, secret),
       new Date().toISOString(),
-    ) || null
+    )) || null
   );
 }
 
-export function requireStoreSession(database, request, secret) {
-  const session = findSession(database, request, secret);
+export async function requireStoreSession(database, request, secret) {
+  const session = await findSession(database, request, secret);
 
   if (!session || session.role !== 'store_owner' || !session.business_id) {
     throw unauthorized();
@@ -116,6 +116,6 @@ export function requireCsrf(request, session) {
   }
 }
 
-export function deleteSession(database, sessionId) {
-  database.run('DELETE FROM sessions WHERE id = ?', sessionId);
+export async function deleteSession(database, sessionId) {
+  await database.run('DELETE FROM sessions WHERE id = ?', sessionId);
 }

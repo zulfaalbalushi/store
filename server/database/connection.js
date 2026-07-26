@@ -3,6 +3,7 @@ import path from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 
 import { runMigrations } from './migrate.js';
+import { openPostgresDatabase } from './postgres.js';
 
 export async function openDatabase(databasePath) {
   await mkdir(path.dirname(databasePath), { recursive: true });
@@ -32,13 +33,16 @@ export async function openDatabase(databasePath) {
     get(sql, ...parameters) {
       return database.prepare(sql).get(...parameters);
     },
+    insert(sql, ...parameters) {
+      return Number(database.prepare(sql).run(...parameters).lastInsertRowid);
+    },
     run(sql, ...parameters) {
       return database.prepare(sql).run(...parameters);
     },
-    transaction(callback) {
+    async transaction(callback) {
       database.exec('BEGIN IMMEDIATE');
       try {
-        const result = callback();
+        const result = await callback(this);
         database.exec('COMMIT');
         return result;
       } catch (error) {
@@ -50,4 +54,12 @@ export async function openDatabase(databasePath) {
       database.close();
     },
   };
+}
+
+export async function openConfiguredDatabase(config) {
+  if (config.databaseType === 'postgresql') {
+    return openPostgresDatabase(config.databaseUrl, config.databaseCaPath);
+  }
+
+  return openDatabase(config.databasePath);
 }

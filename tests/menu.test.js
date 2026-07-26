@@ -69,11 +69,11 @@ test('categories are Store-scoped, case-insensitive, and protected while referen
   const application = await menuDatabase();
 
   try {
-    const category = createCategory(application.database, application.firstOwner, {
+    const category = await createCategory(application.database, application.firstOwner, {
       name: 'Main dishes',
     });
     assert.equal(category.name, 'Main dishes');
-    assert.throws(
+    await assert.rejects(
       () =>
         createCategory(application.database, application.firstOwner, {
           name: 'main DISHES',
@@ -81,10 +81,10 @@ test('categories are Store-scoped, case-insensitive, and protected while referen
       (error) => error.status === 409,
     );
 
-    const secondCategory = createCategory(application.database, application.secondOwner, {
+    const secondCategory = await createCategory(application.database, application.secondOwner, {
       name: 'Mains',
     });
-    assert.throws(
+    await assert.rejects(
       () =>
         updateCategory(application.database, application.firstOwner, secondCategory.id, {
           name: 'Changed',
@@ -92,28 +92,28 @@ test('categories are Store-scoped, case-insensitive, and protected while referen
       (error) => error.status === 404,
     );
 
-    createDish(
+    await createDish(
       application.database,
       application.firstOwner,
       dishInput({ categoryId: category.id }),
     );
-    assert.throws(
+    await assert.rejects(
       () => deleteCategory(application.database, application.firstOwner, category.id),
       (error) => error.status === 409,
     );
 
-    const emptyCategory = createCategory(application.database, application.firstOwner, {
+    const emptyCategory = await createCategory(application.database, application.firstOwner, {
       name: 'Seasonal',
     });
     assert.deepEqual(
-      deleteCategory(application.database, application.firstOwner, emptyCategory.id),
+      await deleteCategory(application.database, application.firstOwner, emptyCategory.id),
       {
         deleted: true,
         id: emptyCategory.id,
       },
     );
 
-    const categories = listCategories(application.database, application.firstOwner);
+    const categories = await listCategories(application.database, application.firstOwner);
     assert.deepEqual(categories, [{ dishCount: 1, id: category.id, name: 'Main dishes' }]);
   } finally {
     await application.close();
@@ -124,16 +124,16 @@ test('dish validation rejects unsafe price and cross-business category IDs', asy
   const application = await menuDatabase();
 
   try {
-    const otherCategory = createCategory(application.database, application.secondOwner, {
+    const otherCategory = await createCategory(application.database, application.secondOwner, {
       name: 'Private category',
     });
 
-    assert.throws(
+    await assert.rejects(
       () =>
         createDish(application.database, application.firstOwner, dishInput({ priceBaisa: 4.5 })),
       (error) => error.status === 422 && Boolean(error.details.priceBaisa),
     );
-    assert.throws(
+    await assert.rejects(
       () =>
         createDish(
           application.database,
@@ -151,13 +151,15 @@ test('owners can create, filter, update, and archive only their dishes', async (
   const application = await menuDatabase();
 
   try {
-    const mains = createCategory(application.database, application.firstOwner, { name: 'Mains' });
-    const shuwa = createDish(
+    const mains = await createCategory(application.database, application.firstOwner, {
+      name: 'Mains',
+    });
+    const shuwa = await createDish(
       application.database,
       application.firstOwner,
       dishInput({ categoryId: mains.id, status: 'active' }),
     );
-    createDish(
+    await createDish(
       application.database,
       application.firstOwner,
       dishInput({
@@ -167,13 +169,13 @@ test('owners can create, filter, update, and archive only their dishes', async (
         status: 'unavailable',
       }),
     );
-    createDish(
+    await createDish(
       application.database,
       application.firstOwner,
       dishInput({ name: 'Luqaimat', priceBaisa: 1800 }),
     );
 
-    const filtered = listDishes(
+    const filtered = await listDishes(
       application.database,
       application.firstOwner,
       new URLSearchParams({
@@ -190,7 +192,7 @@ test('owners can create, filter, update, and archive only their dishes', async (
     assert.equal(filtered.pagination.totalItems, 2);
     assert.equal(filtered.pagination.totalPages, 2);
 
-    assert.throws(
+    await assert.rejects(
       () =>
         updateDish(
           application.database,
@@ -201,7 +203,7 @@ test('owners can create, filter, update, and archive only their dishes', async (
       (error) => error.status === 409,
     );
 
-    const unavailable = updateDish(
+    const unavailable = await updateDish(
       application.database,
       application.firstOwner,
       shuwa.id,
@@ -209,23 +211,23 @@ test('owners can create, filter, update, and archive only their dishes', async (
     );
     assert.equal(unavailable.status, 'unavailable');
 
-    const archived = archiveDish(application.database, application.firstOwner, shuwa.id);
+    const archived = await archiveDish(application.database, application.firstOwner, shuwa.id);
     assert.equal(archived.status, 'archived');
-    assert.throws(
+    await assert.rejects(
       () => updateDish(application.database, application.firstOwner, shuwa.id, dishInput()),
       (error) => error.status === 409,
     );
 
-    assert.throws(
+    await assert.rejects(
       () => getDish(application.database, application.secondOwner, shuwa.id),
       (error) => error.status === 404,
     );
-    assert.throws(
+    await assert.rejects(
       () => archiveDish(application.database, application.secondOwner, shuwa.id),
       (error) => error.status === 404,
     );
 
-    const currentMenu = listDishes(
+    const currentMenu = await listDishes(
       application.database,
       application.firstOwner,
       new URLSearchParams({ status: 'all' }),
@@ -235,7 +237,7 @@ test('owners can create, filter, update, and archive only their dishes', async (
       false,
     );
 
-    const archivedMenu = listDishes(
+    const archivedMenu = await listDishes(
       application.database,
       application.firstOwner,
       new URLSearchParams({ status: 'archived' }),

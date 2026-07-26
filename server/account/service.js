@@ -6,8 +6,8 @@ function cleanText(value) {
   return typeof value === 'string' ? value.trim() : '';
 }
 
-function ownedAccount(database, session) {
-  const account = database.get(
+async function ownedAccount(database, session) {
+  const account = await database.get(
     `SELECT users.id, users.email, users.full_name, users.password_hash
      FROM users
      JOIN businesses ON businesses.owner_user_id = users.id
@@ -28,12 +28,12 @@ function accountResponse(account) {
   };
 }
 
-export function getOwnedAccount(database, session) {
-  return accountResponse(ownedAccount(database, session));
+export async function getOwnedAccount(database, session) {
+  return accountResponse(await ownedAccount(database, session));
 }
 
-export function updateOwnedAccount(database, session, input) {
-  const account = ownedAccount(database, session);
+export async function updateOwnedAccount(database, session, input) {
+  const account = await ownedAccount(database, session);
   const fullName = cleanText(input?.fullName);
 
   if (fullName.length < 2 || fullName.length > 100) {
@@ -44,15 +44,15 @@ export function updateOwnedAccount(database, session, input) {
 
   if (fullName === account.full_name) return accountResponse(account);
 
-  database.transaction(() => {
-    database.run(
+  await database.transaction(async (transaction) => {
+    await transaction.run(
       `UPDATE users
        SET full_name = ?, updated_at = CURRENT_TIMESTAMP
        WHERE id = ? AND role = 'store_owner'`,
       fullName,
       account.id,
     );
-    database.run(
+    await transaction.run(
       `INSERT INTO audit_events
         (business_id, actor_user_id, action, resource_type, resource_id)
        VALUES (?, ?, 'account.profile_updated', 'user', ?)`,
@@ -66,7 +66,7 @@ export function updateOwnedAccount(database, session, input) {
 }
 
 export async function changeOwnedPassword(database, session, input) {
-  const account = ownedAccount(database, session);
+  const account = await ownedAccount(database, session);
   const currentPassword = typeof input?.currentPassword === 'string' ? input.currentPassword : '';
   const newPassword = typeof input?.newPassword === 'string' ? input.newPassword : '';
   const errors = {};
@@ -86,20 +86,20 @@ export async function changeOwnedPassword(database, session, input) {
 
   const passwordHash = await argon2.hash(newPassword, { type: argon2.argon2id });
 
-  database.transaction(() => {
-    database.run(
+  await database.transaction(async (transaction) => {
+    await transaction.run(
       `UPDATE users
        SET password_hash = ?, updated_at = CURRENT_TIMESTAMP
        WHERE id = ? AND role = 'store_owner'`,
       passwordHash,
       account.id,
     );
-    database.run(
+    await transaction.run(
       'DELETE FROM sessions WHERE user_id = ? AND id <> ?',
       session.user_id,
       session.session_id,
     );
-    database.run(
+    await transaction.run(
       `INSERT INTO audit_events
         (business_id, actor_user_id, action, resource_type, resource_id)
        VALUES (?, ?, 'account.password_changed', 'user', ?)`,

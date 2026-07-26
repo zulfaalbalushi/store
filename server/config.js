@@ -16,6 +16,8 @@ export function loadConfig(environment = process.env) {
   const host = environment.HOST || '127.0.0.1';
   const port = Number(environment.PORT || 8000);
   const databasePath = environment.BAYTNA_DATABASE_PATH;
+  const databaseUrl = environment.BAYTNA_DATABASE_URL;
+  const databaseCaPath = environment.BAYTNA_DATABASE_CA_PATH;
   const sessionSecret = environment.BAYTNA_SESSION_SECRET;
 
   if (!ALLOWED_ENVIRONMENTS.has(nodeEnvironment)) {
@@ -26,8 +28,23 @@ export function loadConfig(environment = process.env) {
     errors.push('PORT must be an integer from 0 to 65535.');
   }
 
-  if (!databasePath) {
-    errors.push('BAYTNA_DATABASE_PATH is required.');
+  if (!databasePath && !databaseUrl) {
+    errors.push('BAYTNA_DATABASE_PATH or BAYTNA_DATABASE_URL is required.');
+  }
+
+  if (databasePath && databaseUrl) {
+    errors.push('Set only one of BAYTNA_DATABASE_PATH or BAYTNA_DATABASE_URL.');
+  }
+
+  if (databaseUrl) {
+    try {
+      const parsedDatabaseUrl = new URL(databaseUrl);
+      if (!['postgres:', 'postgresql:'].includes(parsedDatabaseUrl.protocol)) {
+        errors.push('BAYTNA_DATABASE_URL must use the postgres or postgresql protocol.');
+      }
+    } catch {
+      errors.push('BAYTNA_DATABASE_URL must be a valid PostgreSQL connection URL.');
+    }
   }
 
   if (!sessionSecret || sessionSecret.length < 32) {
@@ -42,7 +59,10 @@ export function loadConfig(environment = process.env) {
     environment: nodeEnvironment,
     host,
     port,
-    databasePath: path.resolve(databasePath),
+    databaseCaPath: databaseCaPath ? path.resolve(databaseCaPath) : null,
+    databasePath: databasePath ? path.resolve(databasePath) : null,
+    databaseUrl: databaseUrl || null,
+    databaseType: databaseUrl ? 'postgresql' : 'sqlite',
     sessionSecret,
   });
 }

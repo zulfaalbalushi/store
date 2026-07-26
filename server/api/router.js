@@ -68,7 +68,7 @@ export function createApiRouter({ config, database }) {
 
     if (requestUrl.pathname === '/api/v1/auth/session') {
       requireMethod(request, 'GET');
-      const session = requireStoreSession(database, request, config.sessionSecret);
+      const session = await requireStoreSession(database, request, config.sessionSecret);
 
       sendSuccess(response, {
         account: {
@@ -86,9 +86,9 @@ export function createApiRouter({ config, database }) {
 
     if (requestUrl.pathname === '/api/v1/auth/sign-out') {
       requireMethod(request, 'POST');
-      const session = requireStoreSession(database, request, config.sessionSecret);
+      const session = await requireStoreSession(database, request, config.sessionSecret);
       requireCsrf(request, session);
-      deleteSession(database, session.session_id);
+      await deleteSession(database, session.session_id);
 
       sendSuccess(response, { signedOut: true }, 200, {
         'Set-Cookie': expiredSessionCookie(isProduction),
@@ -97,17 +97,17 @@ export function createApiRouter({ config, database }) {
     }
 
     if (requestUrl.pathname === '/api/v1/store/account') {
-      const session = requireStoreSession(database, request, config.sessionSecret);
+      const session = await requireStoreSession(database, request, config.sessionSecret);
 
       if (request.method === 'GET') {
-        sendSuccess(response, { account: getOwnedAccount(database, session) });
+        sendSuccess(response, { account: await getOwnedAccount(database, session) });
         return true;
       }
 
       if (request.method === 'PUT') {
         requireCsrf(request, session);
         const input = await readJsonBody(request);
-        sendSuccess(response, { account: updateOwnedAccount(database, session, input) });
+        sendSuccess(response, { account: await updateOwnedAccount(database, session, input) });
         return true;
       }
 
@@ -116,7 +116,7 @@ export function createApiRouter({ config, database }) {
 
     if (requestUrl.pathname === '/api/v1/store/account/password') {
       requireMethod(request, 'POST');
-      const session = requireStoreSession(database, request, config.sessionSecret);
+      const session = await requireStoreSession(database, request, config.sessionSecret);
       requireCsrf(request, session);
       authenticationRateLimiter.check(request, 'store-password-change');
       const input = await readJsonBody(request);
@@ -125,17 +125,17 @@ export function createApiRouter({ config, database }) {
     }
 
     if (requestUrl.pathname === '/api/v1/store/business') {
-      const session = requireStoreSession(database, request, config.sessionSecret);
+      const session = await requireStoreSession(database, request, config.sessionSecret);
 
       if (request.method === 'GET') {
-        sendSuccess(response, { business: getOwnedBusiness(database, session) });
+        sendSuccess(response, { business: await getOwnedBusiness(database, session) });
         return true;
       }
 
       if (request.method === 'PUT') {
         requireCsrf(request, session);
         const input = await readJsonBody(request);
-        sendSuccess(response, { business: updateOwnedBusiness(database, session, input) });
+        sendSuccess(response, { business: await updateOwnedBusiness(database, session, input) });
         return true;
       }
 
@@ -144,24 +144,24 @@ export function createApiRouter({ config, database }) {
 
     if (requestUrl.pathname === '/api/v1/store/business/submit') {
       requireMethod(request, 'POST');
-      const session = requireStoreSession(database, request, config.sessionSecret);
+      const session = await requireStoreSession(database, request, config.sessionSecret);
       requireCsrf(request, session);
-      sendSuccess(response, { business: submitOwnedBusiness(database, session) });
+      sendSuccess(response, { business: await submitOwnedBusiness(database, session) });
       return true;
     }
 
     if (requestUrl.pathname === '/api/v1/store/categories') {
-      const session = requireStoreSession(database, request, config.sessionSecret);
+      const session = await requireStoreSession(database, request, config.sessionSecret);
 
       if (request.method === 'GET') {
-        sendSuccess(response, { categories: listCategories(database, session) });
+        sendSuccess(response, { categories: await listCategories(database, session) });
         return true;
       }
 
       if (request.method === 'POST') {
         requireCsrf(request, session);
         const input = await readJsonBody(request);
-        sendSuccess(response, { category: createCategory(database, session, input) }, 201);
+        sendSuccess(response, { category: await createCategory(database, session, input) }, 201);
         return true;
       }
 
@@ -170,20 +170,20 @@ export function createApiRouter({ config, database }) {
 
     const categoryMatch = requestUrl.pathname.match(/^\/api\/v1\/store\/categories\/(\d+)$/);
     if (categoryMatch) {
-      const session = requireStoreSession(database, request, config.sessionSecret);
+      const session = await requireStoreSession(database, request, config.sessionSecret);
       requireCsrf(request, session);
 
       if (request.method === 'PUT') {
         const input = await readJsonBody(request);
         sendSuccess(response, {
-          category: updateCategory(database, session, categoryMatch[1], input),
+          category: await updateCategory(database, session, categoryMatch[1], input),
         });
         return true;
       }
 
       if (request.method === 'DELETE') {
         sendSuccess(response, {
-          result: deleteCategory(database, session, categoryMatch[1]),
+          result: await deleteCategory(database, session, categoryMatch[1]),
         });
         return true;
       }
@@ -192,17 +192,17 @@ export function createApiRouter({ config, database }) {
     }
 
     if (requestUrl.pathname === '/api/v1/store/dishes') {
-      const session = requireStoreSession(database, request, config.sessionSecret);
+      const session = await requireStoreSession(database, request, config.sessionSecret);
 
       if (request.method === 'GET') {
-        sendSuccess(response, listDishes(database, session, requestUrl.searchParams));
+        sendSuccess(response, await listDishes(database, session, requestUrl.searchParams));
         return true;
       }
 
       if (request.method === 'POST') {
         requireCsrf(request, session);
         const input = await readJsonBody(request);
-        sendSuccess(response, { dish: createDish(database, session, input) }, 201);
+        sendSuccess(response, { dish: await createDish(database, session, input) }, 201);
         return true;
       }
 
@@ -212,25 +212,25 @@ export function createApiRouter({ config, database }) {
     const archiveMatch = requestUrl.pathname.match(/^\/api\/v1\/store\/dishes\/(\d+)\/archive$/);
     if (archiveMatch) {
       requireMethod(request, 'POST');
-      const session = requireStoreSession(database, request, config.sessionSecret);
+      const session = await requireStoreSession(database, request, config.sessionSecret);
       requireCsrf(request, session);
-      sendSuccess(response, { dish: archiveDish(database, session, archiveMatch[1]) });
+      sendSuccess(response, { dish: await archiveDish(database, session, archiveMatch[1]) });
       return true;
     }
 
     const dishMatch = requestUrl.pathname.match(/^\/api\/v1\/store\/dishes\/(\d+)$/);
     if (dishMatch) {
-      const session = requireStoreSession(database, request, config.sessionSecret);
+      const session = await requireStoreSession(database, request, config.sessionSecret);
 
       if (request.method === 'GET') {
-        sendSuccess(response, { dish: getDish(database, session, dishMatch[1]) });
+        sendSuccess(response, { dish: await getDish(database, session, dishMatch[1]) });
         return true;
       }
 
       if (request.method === 'PUT') {
         requireCsrf(request, session);
         const input = await readJsonBody(request);
-        sendSuccess(response, { dish: updateDish(database, session, dishMatch[1], input) });
+        sendSuccess(response, { dish: await updateDish(database, session, dishMatch[1], input) });
         return true;
       }
 
@@ -239,26 +239,26 @@ export function createApiRouter({ config, database }) {
 
     if (requestUrl.pathname === '/api/v1/store/orders') {
       requireMethod(request, 'GET');
-      const session = requireStoreSession(database, request, config.sessionSecret);
-      sendSuccess(response, listOrders(database, session, requestUrl.searchParams));
+      const session = await requireStoreSession(database, request, config.sessionSecret);
+      sendSuccess(response, await listOrders(database, session, requestUrl.searchParams));
       return true;
     }
 
     const orderStatusMatch = requestUrl.pathname.match(/^\/api\/v1\/store\/orders\/(\d+)\/status$/);
     if (orderStatusMatch) {
       requireMethod(request, 'POST');
-      const session = requireStoreSession(database, request, config.sessionSecret);
+      const session = await requireStoreSession(database, request, config.sessionSecret);
       requireCsrf(request, session);
       const input = await readJsonBody(request);
-      sendSuccess(response, transitionOrder(database, session, orderStatusMatch[1], input));
+      sendSuccess(response, await transitionOrder(database, session, orderStatusMatch[1], input));
       return true;
     }
 
     const orderMatch = requestUrl.pathname.match(/^\/api\/v1\/store\/orders\/(\d+)$/);
     if (orderMatch) {
       requireMethod(request, 'GET');
-      const session = requireStoreSession(database, request, config.sessionSecret);
-      sendSuccess(response, { order: getOrder(database, session, orderMatch[1]) });
+      const session = await requireStoreSession(database, request, config.sessionSecret);
+      sendSuccess(response, { order: await getOrder(database, session, orderMatch[1]) });
       return true;
     }
 

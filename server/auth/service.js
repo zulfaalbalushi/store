@@ -43,7 +43,7 @@ function validateCredentials(input, requireRegistrationFields) {
 export async function registerStoreOwner(database, input, sessionSecret) {
   const values = validateCredentials(input, true);
 
-  if (database.get('SELECT id FROM users WHERE email = ?', values.email)) {
+  if (await database.get('SELECT id FROM users WHERE email = ?', values.email)) {
     throw conflict('An account with this email already exists.');
   }
 
@@ -51,45 +51,42 @@ export async function registerStoreOwner(database, input, sessionSecret) {
     type: argon2.argon2id,
   });
 
-  const account = database.transaction(() => {
-    const userResult = database.run(
+  const account = await database.transaction(async (transaction) => {
+    const userId = await transaction.insert(
       `INSERT INTO users (role, email, password_hash, full_name)
        VALUES ('store_owner', ?, ?, ?)`,
       values.email,
       passwordHash,
       values.fullName,
     );
-    const userId = Number(userResult.lastInsertRowid);
-    const businessResult = database.run(
+    const businessId = await transaction.insert(
       `INSERT INTO businesses (owner_user_id, name, contact_email)
        VALUES (?, ?, ?)`,
       userId,
       values.businessName,
       values.email,
     );
-    const businessId = Number(businessResult.lastInsertRowid);
-
     for (let day = 0; day < 7; day += 1) {
-      database.run(
+      await transaction.run(
         'INSERT INTO business_hours (business_id, day_of_week) VALUES (?, ?)',
         businessId,
         day,
       );
     }
-    createDefaultCategories(database, businessId);
+    await createDefaultCategories(transaction, businessId);
 
     return { businessId, businessName: values.businessName, email: values.email, userId };
   });
 
   return {
     account,
-    session: createSession(database, account.userId, sessionSecret),
+    session: await createSession(database, account.userId, sessionSecret),
   };
 }
 
 export async function signInStoreOwner(database, input, sessionSecret) {
   const values = validateCredentials(input, false);
-  const user = database.get(
+  const user = await database.get(
     `SELECT users.id, users.email, users.password_hash, users.full_name,
       businesses.id AS business_id, businesses.name AS business_name
      FROM users
@@ -110,6 +107,6 @@ export async function signInStoreOwner(database, input, sessionSecret) {
       fullName: user.full_name,
       userId: user.id,
     },
-    session: createSession(database, user.id, sessionSecret),
+    session: await createSession(database, user.id, sessionSecret),
   };
 }

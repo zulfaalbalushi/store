@@ -10,6 +10,7 @@
   "scripts": {
     "dev": "node --env-file-if-exists=.env --watch server/index.js",
     "start": "node --env-file-if-exists=.env server/index.js",
+    "db:migrate:postgres": "node --env-file-if-exists=.env server/database/migrate-postgres-cli.js",
     "test": "node --test",
     "lint": "eslint .",
     "format": "prettier --write .",
@@ -20,6 +21,7 @@
     "prettier": "^3.9.6"
   },
   "dependencies": {
-    "argon2": "^0.45.1"
+    "argon2": "^0.45.1",
+    "pg": "^8.22.0"
   }
 }

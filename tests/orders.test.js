@@ -94,7 +94,7 @@ test('owners can search, filter, sort, and paginate only their orders', async ()
     });
     application.createOrder(application.secondOwner, 'PRIVATE-1003');
 
-    const result = listOrders(
+    const result = await listOrders(
       application.database,
       application.firstOwner,
       new URLSearchParams({
@@ -111,7 +111,7 @@ test('owners can search, filter, sort, and paginate only their orders', async ()
     assert.equal(result.orders[0].orderNumber, 'BAY-1002');
     assert.equal(result.orders[0].itemCount, 2);
 
-    const all = listOrders(
+    const all = await listOrders(
       application.database,
       application.firstOwner,
       new URLSearchParams({ pageSize: '1', sort: 'total_desc' }),
@@ -119,7 +119,7 @@ test('owners can search, filter, sort, and paginate only their orders', async ()
     assert.equal(all.pagination.totalItems, 2);
     assert.equal(all.pagination.totalPages, 2);
     assert.equal(all.orders[0].orderNumber, 'BAY-1002');
-    assert.throws(
+    await assert.rejects(
       () =>
         listOrders(
           application.database,
@@ -137,7 +137,7 @@ test('order details use snapshots and expose only fulfillment customer informati
   const application = await orderDatabase();
   try {
     const orderId = application.createOrder(application.firstOwner, 'BAY-2001');
-    const order = getOrder(application.database, application.firstOwner, orderId);
+    const order = await getOrder(application.database, application.firstOwner, orderId);
 
     assert.deepEqual(order.customer, {
       deliveryAddress: 'House 4, Al Khoudh',
@@ -148,7 +148,7 @@ test('order details use snapshots and expose only fulfillment customer informati
     assert.equal(order.items[0].quantity, 2);
     assert.equal('customerUserId' in order, false);
     assert.equal('email' in order.customer, false);
-    assert.throws(
+    await assert.rejects(
       () => getOrder(application.database, application.secondOwner, orderId),
       (error) => error.status === 404,
     );
@@ -161,13 +161,13 @@ test('status transitions write history and audit records and repeated requests a
   const application = await orderDatabase();
   try {
     const orderId = application.createOrder(application.firstOwner, 'BAY-3001');
-    const accepted = transitionOrder(application.database, application.firstOwner, orderId, {
+    const accepted = await transitionOrder(application.database, application.firstOwner, orderId, {
       status: 'accepted',
     });
     assert.equal(accepted.changed, true);
     assert.equal(accepted.order.status, 'accepted');
 
-    const repeated = transitionOrder(application.database, application.firstOwner, orderId, {
+    const repeated = await transitionOrder(application.database, application.firstOwner, orderId, {
       status: 'accepted',
     });
     assert.equal(repeated.changed, false);
@@ -184,14 +184,14 @@ test('status transitions write history and audit records and repeated requests a
         orderId,
       ),
     );
-    assert.throws(
+    await assert.rejects(
       () =>
         transitionOrder(application.database, application.firstOwner, orderId, {
           status: 'completed',
         }),
       (error) => error.status === 409,
     );
-    assert.throws(
+    await assert.rejects(
       () =>
         transitionOrder(application.database, application.secondOwner, orderId, {
           status: 'preparing',
@@ -207,7 +207,7 @@ test('rejected and cancelled transitions require and preserve a reason', async (
   const application = await orderDatabase();
   try {
     const rejectId = application.createOrder(application.firstOwner, 'BAY-4001');
-    assert.throws(
+    await assert.rejects(
       () =>
         transitionOrder(application.database, application.firstOwner, rejectId, {
           status: 'rejected',
@@ -215,7 +215,7 @@ test('rejected and cancelled transitions require and preserve a reason', async (
       (error) => error.status === 422 && Boolean(error.details.reason),
     );
 
-    const rejected = transitionOrder(application.database, application.firstOwner, rejectId, {
+    const rejected = await transitionOrder(application.database, application.firstOwner, rejectId, {
       reason: 'Kitchen capacity reached',
       status: 'rejected',
     });
@@ -224,10 +224,15 @@ test('rejected and cancelled transitions require and preserve a reason', async (
     const cancelId = application.createOrder(application.firstOwner, 'BAY-4002', {
       status: 'accepted',
     });
-    const cancelled = transitionOrder(application.database, application.firstOwner, cancelId, {
-      reason: 'Ingredient unavailable',
-      status: 'cancelled',
-    });
+    const cancelled = await transitionOrder(
+      application.database,
+      application.firstOwner,
+      cancelId,
+      {
+        reason: 'Ingredient unavailable',
+        status: 'cancelled',
+      },
+    );
     assert.equal(cancelled.order.status, 'cancelled');
     assert.equal(cancelled.order.history[0].reason, 'Ingredient unavailable');
   } finally {

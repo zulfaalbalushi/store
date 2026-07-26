@@ -8,7 +8,7 @@ const STATUS_TRANSITIONS = {
 };
 const SORTS = {
   updated_desc: 'dishes.updated_at DESC, dishes.id DESC',
-  name_asc: 'dishes.name COLLATE NOCASE ASC, dishes.id ASC',
+  name_asc: 'LOWER(dishes.name) ASC, dishes.id ASC',
   price_asc: 'dishes.price_baisa ASC, dishes.id ASC',
   price_desc: 'dishes.price_baisa DESC, dishes.id DESC',
 };
@@ -22,8 +22,8 @@ function positiveInteger(value) {
   return Number.isInteger(number) && number > 0 ? number : null;
 }
 
-function audit(database, session, action, resourceType, resourceId, fields = []) {
-  database.run(
+async function audit(database, session, action, resourceType, resourceId, fields = []) {
+  await database.run(
     `INSERT INTO audit_events
       (business_id, actor_user_id, action, resource_type, resource_id, metadata_json)
      VALUES (?, ?, ?, ?, ?, ?)`,
@@ -48,21 +48,21 @@ function validateCategoryName(input) {
   return name;
 }
 
-function categoryNameExists(database, businessId, name, excludedCategoryId = null) {
+async function categoryNameExists(database, businessId, name, excludedCategoryId = null) {
   const parameters = [businessId, name];
-  let sql = 'SELECT id FROM categories WHERE business_id = ? AND name = ? COLLATE NOCASE';
+  let sql = 'SELECT id FROM categories WHERE business_id = ? AND LOWER(name) = LOWER(?)';
 
   if (excludedCategoryId) {
     sql += ' AND id != ?';
     parameters.push(excludedCategoryId);
   }
 
-  return Boolean(database.get(sql, ...parameters));
+  return Boolean(await database.get(sql, ...parameters));
 }
 
-export function listCategories(database, session) {
-  return database
-    .all(
+export async function listCategories(database, session) {
+  return (
+    await database.all(
       `SELECT categories.id, categories.name, COUNT(dishes.id) AS dish_count
      FROM categories
      LEFT JOIN dishes
@@ -71,39 +71,38 @@ export function listCategories(database, session) {
        AND dishes.status != 'archived'
      WHERE categories.business_id = ?
      GROUP BY categories.id, categories.name
-     ORDER BY categories.name COLLATE NOCASE`,
+     ORDER BY LOWER(categories.name)`,
       session.business_id,
     )
-    .map((category) => ({
-      dishCount: category.dish_count,
-      id: category.id,
-      name: category.name,
-    }));
+  ).map((category) => ({
+    dishCount: Number(category.dish_count),
+    id: category.id,
+    name: category.name,
+  }));
 }
 
-export function createCategory(database, session, input) {
+export async function createCategory(database, session, input) {
   const name = validateCategoryName(input);
 
-  if (categoryNameExists(database, session.business_id, name)) {
+  if (await categoryNameExists(database, session.business_id, name)) {
     throw conflict('A category with this name already exists.');
   }
 
-  const result = database.run(
+  const categoryId = await database.insert(
     'INSERT INTO categories (business_id, name) VALUES (?, ?)',
     session.business_id,
     name,
   );
-  const categoryId = Number(result.lastInsertRowid);
-  audit(database, session, 'category.created', 'category', categoryId, ['name']);
+  await audit(database, session, 'category.created', 'category', categoryId, ['name']);
 
   return { dishCount: 0, id: categoryId, name };
 }
 
-export function updateCategory(database, session, categoryId, input) {
+export async function updateCategory(database, session, categoryId, input) {
   const id = positiveInteger(categoryId);
   const name = validateCategoryName(input);
   const existing = id
-    ? database.get(
+    ? await database.get(
         'SELECT id FROM categories WHERE id = ? AND business_id = ?',
         id,
         session.business_id,
@@ -111,11 +110,11 @@ export function updateCategory(database, session, categoryId, input) {
     : null;
 
   if (!existing) throw notFound('The category was not found.');
-  if (categoryNameExists(database, session.business_id, name, id)) {
+  if (await categoryNameExists(database, session.business_id, name, id)) {
     throw conflict('A category with this name already exists.');
   }
 
-  database.run(
+  await database.run(
     `UPDATE categories
      SET name = ?, updated_at = CURRENT_TIMESTAMP
      WHERE id = ? AND business_id = ?`,
@@ -123,15 +122,15 @@ export function updateCategory(database, session, categoryId, input) {
     id,
     session.business_id,
   );
-  audit(database, session, 'category.updated', 'category', id, ['name']);
+  await audit(database, session, 'category.updated', 'category', id, ['name']);
 
-  return listCategories(database, session).find((category) => category.id === id);
+  return (await listCategories(database, session)).find((category) => category.id === id);
 }
 
-export function deleteCategory(database, session, categoryId) {
+export async function deleteCategory(database, session, categoryId) {
   const id = positiveInteger(categoryId);
   const category = id
-    ? database.get(
+    ? await database.get(
         `SELECT categories.id, COUNT(dishes.id) AS dish_count
          FROM categories
          LEFT JOIN dishes ON dishes.category_id = categories.id
@@ -147,13 +146,17 @@ export function deleteCategory(database, session, categoryId) {
     throw conflict('This category is used by one or more dishes and cannot be deleted.');
   }
 
-  database.run('DELETE FROM categories WHERE id = ? AND business_id = ?', id, session.business_id);
-  audit(database, session, 'category.deleted', 'category', id);
+  await database.run(
+    'DELETE FROM categories WHERE id = ? AND business_id = ?',
+    id,
+    session.business_id,
+  );
+  await audit(database, session, 'category.deleted', 'category', id);
 
   return { deleted: true, id };
 }
 
-function validateDish(database, session, input) {
+async function validateDish(database, session, input) {
   const errors = {};
   const values = {
     name: cleanText(input.name),
@@ -187,11 +190,11 @@ function validateDish(database, session, input) {
   }
   if (
     values.categoryId &&
-    !database.get(
+    !(await database.get(
       'SELECT id FROM categories WHERE id = ? AND business_id = ?',
       values.categoryId,
       session.business_id,
-    )
+    ))
   ) {
     errors.categoryId = 'The selected category does not belong to your business.';
   }
@@ -214,10 +217,10 @@ function dishResponse(row) {
   };
 }
 
-function ownedDish(database, session, dishId) {
+async function ownedDish(database, session, dishId) {
   const id = positiveInteger(dishId);
   const dish = id
-    ? database.get(
+    ? await database.get(
         `SELECT dishes.*, categories.name AS category_name
          FROM dishes
          LEFT JOIN categories
@@ -233,7 +236,7 @@ function ownedDish(database, session, dishId) {
   return dish;
 }
 
-export function listDishes(database, session, query) {
+export async function listDishes(database, session, query) {
   const search = cleanText(query.get('search'));
   const requestedStatus = cleanText(query.get('status')) || 'all';
   const categoryId = query.get('categoryId') ? positiveInteger(query.get('categoryId')) : null;
@@ -246,7 +249,7 @@ export function listDishes(database, session, query) {
   if (search) {
     const escapedSearch = search.replace(/[\\%_]/g, '\\$&');
     where.push(
-      "(dishes.name LIKE ? ESCAPE '\\' COLLATE NOCASE OR dishes.description LIKE ? ESCAPE '\\' COLLATE NOCASE)",
+      "(LOWER(dishes.name) LIKE LOWER(?) ESCAPE '\\' OR LOWER(dishes.description) LIKE LOWER(?) ESCAPE '\\')",
     );
     parameters.push(`%${escapedSearch}%`, `%${escapedSearch}%`);
   }
@@ -269,14 +272,14 @@ export function listDishes(database, session, query) {
   }
 
   const whereSql = where.join(' AND ');
-  const count = database.get(
-    `SELECT COUNT(*) AS total FROM dishes WHERE ${whereSql}`,
-    ...parameters,
-  ).total;
+  const count = Number(
+    (await database.get(`SELECT COUNT(*) AS total FROM dishes WHERE ${whereSql}`, ...parameters))
+      .total,
+  );
   const totalPages = Math.max(1, Math.ceil(count / pageSize));
   const currentPage = Math.min(page, totalPages);
-  const dishes = database
-    .all(
+  const dishes = (
+    await database.all(
       `SELECT dishes.*, categories.name AS category_name
        FROM dishes
        LEFT JOIN categories
@@ -289,7 +292,7 @@ export function listDishes(database, session, query) {
       pageSize,
       (currentPage - 1) * pageSize,
     )
-    .map(dishResponse);
+  ).map(dishResponse);
 
   return {
     dishes,
@@ -302,13 +305,13 @@ export function listDishes(database, session, query) {
   };
 }
 
-export function getDish(database, session, dishId) {
-  return dishResponse(ownedDish(database, session, dishId));
+export async function getDish(database, session, dishId) {
+  return dishResponse(await ownedDish(database, session, dishId));
 }
 
-export function createDish(database, session, input) {
-  const values = validateDish(database, session, input);
-  const result = database.run(
+export async function createDish(database, session, input) {
+  const values = await validateDish(database, session, input);
+  const dishId = await database.insert(
     `INSERT INTO dishes
       (business_id, category_id, name, description, price_baisa, status)
      VALUES (?, ?, ?, ?, ?, ?)`,
@@ -319,8 +322,7 @@ export function createDish(database, session, input) {
     values.priceBaisa,
     values.status,
   );
-  const dishId = Number(result.lastInsertRowid);
-  audit(database, session, 'dish.created', 'dish', dishId, [
+  await audit(database, session, 'dish.created', 'dish', dishId, [
     'categoryId',
     'name',
     'description',
@@ -328,21 +330,21 @@ export function createDish(database, session, input) {
     'status',
   ]);
 
-  return dishResponse(ownedDish(database, session, dishId));
+  return dishResponse(await ownedDish(database, session, dishId));
 }
 
-export function updateDish(database, session, dishId, input) {
-  const existing = ownedDish(database, session, dishId);
+export async function updateDish(database, session, dishId, input) {
+  const existing = await ownedDish(database, session, dishId);
   if (existing.status === 'archived') {
     throw conflict('Archived dishes cannot be edited.');
   }
 
-  const values = validateDish(database, session, input);
+  const values = await validateDish(database, session, input);
   if (!STATUS_TRANSITIONS[existing.status].has(values.status)) {
     throw conflict(`A ${existing.status} dish cannot be changed directly to ${values.status}.`);
   }
 
-  database.run(
+  await database.run(
     `UPDATE dishes
      SET category_id = ?, name = ?, description = ?, price_baisa = ?, status = ?,
        updated_at = CURRENT_TIMESTAMP
@@ -355,7 +357,7 @@ export function updateDish(database, session, dishId, input) {
     existing.id,
     session.business_id,
   );
-  audit(database, session, 'dish.updated', 'dish', existing.id, [
+  await audit(database, session, 'dish.updated', 'dish', existing.id, [
     'categoryId',
     'name',
     'description',
@@ -363,21 +365,21 @@ export function updateDish(database, session, dishId, input) {
     'status',
   ]);
 
-  return dishResponse(ownedDish(database, session, existing.id));
+  return dishResponse(await ownedDish(database, session, existing.id));
 }
 
-export function archiveDish(database, session, dishId) {
-  const existing = ownedDish(database, session, dishId);
+export async function archiveDish(database, session, dishId) {
+  const existing = await ownedDish(database, session, dishId);
   if (existing.status === 'archived') throw conflict('The dish is already archived.');
 
-  database.run(
+  await database.run(
     `UPDATE dishes
      SET status = 'archived', archived_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
      WHERE id = ? AND business_id = ?`,
     existing.id,
     session.business_id,
   );
-  audit(database, session, 'dish.archived', 'dish', existing.id, ['status']);
+  await audit(database, session, 'dish.archived', 'dish', existing.id, ['status']);
 
-  return dishResponse(ownedDish(database, session, existing.id));
+  return dishResponse(await ownedDish(database, session, existing.id));
 }

@@ -138,8 +138,8 @@ function toBusinessResponse(business, serviceAreas, hours) {
   };
 }
 
-export function getOwnedBusiness(database, session) {
-  const business = database.get(
+export async function getOwnedBusiness(database, session) {
+  const business = await database.get(
     'SELECT * FROM businesses WHERE id = ? AND owner_user_id = ?',
     session.business_id,
     session.user_id,
@@ -147,11 +147,11 @@ export function getOwnedBusiness(database, session) {
 
   if (!business) throw notFound('Your business was not found.');
 
-  const serviceAreas = database.all(
+  const serviceAreas = await database.all(
     'SELECT name FROM service_areas WHERE business_id = ? ORDER BY name',
     business.id,
   );
-  const hours = database.all(
+  const hours = await database.all(
     'SELECT * FROM business_hours WHERE business_id = ? ORDER BY day_of_week',
     business.id,
   );
@@ -159,11 +159,11 @@ export function getOwnedBusiness(database, session) {
   return toBusinessResponse(business, serviceAreas, hours);
 }
 
-export function updateOwnedBusiness(database, session, input) {
+export async function updateOwnedBusiness(database, session, input) {
   const values = validateBusinessInput(input);
 
-  database.transaction(() => {
-    const updateResult = database.run(
+  await database.transaction(async (transaction) => {
+    const updateResult = await transaction.run(
       `UPDATE businesses
        SET name = ?, description = ?, contact_email = ?, phone = ?, address_line = ?,
          wilayat = ?, governorate = ?, is_temporarily_closed = ?, closure_note = ?,
@@ -184,9 +184,9 @@ export function updateOwnedBusiness(database, session, input) {
 
     if (updateResult.changes !== 1) throw notFound('Your business was not found.');
 
-    database.run('DELETE FROM service_areas WHERE business_id = ?', session.business_id);
+    await transaction.run('DELETE FROM service_areas WHERE business_id = ?', session.business_id);
     for (const area of values.serviceAreas) {
-      database.run(
+      await transaction.run(
         'INSERT INTO service_areas (business_id, name) VALUES (?, ?)',
         session.business_id,
         area,
@@ -194,7 +194,7 @@ export function updateOwnedBusiness(database, session, input) {
     }
 
     for (const hours of values.hours) {
-      database.run(
+      await transaction.run(
         `UPDATE business_hours
          SET is_closed = ?, opens_at = ?, closes_at = ?
          WHERE business_id = ? AND day_of_week = ?`,
@@ -206,7 +206,7 @@ export function updateOwnedBusiness(database, session, input) {
       );
     }
 
-    database.run(
+    await transaction.run(
       `INSERT INTO audit_events
         (business_id, actor_user_id, action, resource_type, resource_id, metadata_json)
        VALUES (?, ?, 'business.updated', 'business', ?, ?)`,
@@ -231,8 +231,8 @@ export function updateOwnedBusiness(database, session, input) {
   return getOwnedBusiness(database, session);
 }
 
-export function submitOwnedBusiness(database, session) {
-  const business = getOwnedBusiness(database, session);
+export async function submitOwnedBusiness(database, session) {
+  const business = await getOwnedBusiness(database, session);
 
   if (!business.completeness.isComplete) {
     throw validationError({
@@ -244,8 +244,8 @@ export function submitOwnedBusiness(database, session) {
     throw conflict('Only draft or rejected applications can be submitted.');
   }
 
-  database.transaction(() => {
-    const result = database.run(
+  await database.transaction(async (transaction) => {
+    const result = await transaction.run(
       `UPDATE businesses
        SET application_status = 'pending', status_reason = '', updated_at = CURRENT_TIMESTAMP
        WHERE id = ? AND owner_user_id = ? AND application_status IN ('draft', 'rejected')`,
@@ -255,7 +255,7 @@ export function submitOwnedBusiness(database, session) {
 
     if (result.changes !== 1) throw conflict('The application status changed. Refresh and retry.');
 
-    database.run(
+    await transaction.run(
       `INSERT INTO audit_events
         (business_id, actor_user_id, action, resource_type, resource_id)
        VALUES (?, ?, 'business.submitted', 'business', ?)`,

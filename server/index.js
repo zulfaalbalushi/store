@@ -3,7 +3,7 @@ import { createServer } from 'node:http';
 import { createApiRouter } from './api/router.js';
 import { createRequestHandler } from './app.js';
 import { ConfigurationError, loadConfig } from './config.js';
-import { openDatabase } from './database/connection.js';
+import { openConfiguredDatabase } from './database/connection.js';
 
 async function startServer() {
   let config;
@@ -23,7 +23,7 @@ async function startServer() {
   let database;
 
   try {
-    database = await openDatabase(config.databasePath);
+    database = await openConfiguredDatabase(config);
   } catch (error) {
     console.error('Unable to initialize the Baytna database', error);
     process.exitCode = 1;
@@ -37,9 +37,9 @@ async function startServer() {
     }),
   );
 
-  server.on('error', (error) => {
+  server.on('error', async (error) => {
     console.error('Unable to start Baytna', error);
-    database.close();
+    await database.close();
     process.exitCode = 1;
   });
 
@@ -52,8 +52,8 @@ async function startServer() {
 
   function shutDown(signal) {
     console.log(`${signal} received; shutting down Baytna.`);
-    server.close(() => {
-      database.close();
+    server.close(async () => {
+      await database.close();
     });
   }
 

@@ -46,7 +46,7 @@ function listOrderResponse(row) {
     createdAt: row.created_at,
     customerName: row.customer_name,
     id: row.id,
-    itemCount: row.item_count,
+    itemCount: Number(row.item_count),
     orderNumber: row.order_number,
     status: row.status,
     totalBaisa: row.total_baisa,
@@ -54,26 +54,30 @@ function listOrderResponse(row) {
   };
 }
 
-function ownedOrderRow(database, session, orderId) {
+async function ownedOrderRow(database, session, orderId) {
   const id = positiveInteger(orderId);
   const order = id
-    ? database.get('SELECT * FROM orders WHERE id = ? AND business_id = ?', id, session.business_id)
+    ? await database.get(
+        'SELECT * FROM orders WHERE id = ? AND business_id = ?',
+        id,
+        session.business_id,
+      )
     : null;
 
   if (!order) throw notFound('The order was not found.');
   return order;
 }
 
-function orderDetails(database, session, orderId) {
-  const order = ownedOrderRow(database, session, orderId);
-  const items = database.all(
+async function orderDetails(database, session, orderId) {
+  const order = await ownedOrderRow(database, session, orderId);
+  const items = await database.all(
     `SELECT id, dish_id, dish_name, quantity, unit_price_baisa, line_total_baisa
      FROM order_items
      WHERE order_id = ?
      ORDER BY id`,
     order.id,
   );
-  const history = database.all(
+  const history = await database.all(
     `SELECT order_status_history.id, order_status_history.from_status,
       order_status_history.to_status, order_status_history.reason,
       order_status_history.created_at, users.full_name AS changed_by
@@ -117,7 +121,7 @@ function orderDetails(database, session, orderId) {
   };
 }
 
-export function listOrders(database, session, query) {
+export async function listOrders(database, session, query) {
   const errors = {};
   const search = cleanText(query.get('search'));
   const status = cleanText(query.get('status')) || 'all';
@@ -142,7 +146,7 @@ export function listOrders(database, session, query) {
 
   if (search) {
     const escapedSearch = search.replace(/[\\%_]/g, '\\$&');
-    where.push("orders.order_number LIKE ? ESCAPE '\\' COLLATE NOCASE");
+    where.push("LOWER(orders.order_number) LIKE LOWER(?) ESCAPE '\\'");
     parameters.push(`%${escapedSearch}%`);
   }
   if (status !== 'all') {
@@ -154,19 +158,21 @@ export function listOrders(database, session, query) {
     parameters.push(`${dateFrom} 00:00:00`);
   }
   if (dateTo) {
-    where.push("orders.created_at < datetime(?, '+1 day')");
-    parameters.push(`${dateTo} 00:00:00`);
+    const nextDay = new Date(`${dateTo}T00:00:00Z`);
+    nextDay.setUTCDate(nextDay.getUTCDate() + 1);
+    where.push('orders.created_at < ?');
+    parameters.push(nextDay.toISOString());
   }
 
   const whereSql = where.join(' AND ');
-  const totalItems = database.get(
-    `SELECT COUNT(*) AS total FROM orders WHERE ${whereSql}`,
-    ...parameters,
-  ).total;
+  const totalItems = Number(
+    (await database.get(`SELECT COUNT(*) AS total FROM orders WHERE ${whereSql}`, ...parameters))
+      .total,
+  );
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
   const currentPage = Math.min(page, totalPages);
-  const orders = database
-    .all(
+  const orders = (
+    await database.all(
       `SELECT orders.*,
         (SELECT COALESCE(SUM(quantity), 0) FROM order_items WHERE order_id = orders.id)
           AS item_count
@@ -178,7 +184,7 @@ export function listOrders(database, session, query) {
       pageSize,
       (currentPage - 1) * pageSize,
     )
-    .map(listOrderResponse);
+  ).map(listOrderResponse);
 
   return {
     orders,
@@ -191,12 +197,12 @@ export function listOrders(database, session, query) {
   };
 }
 
-export function getOrder(database, session, orderId) {
+export async function getOrder(database, session, orderId) {
   return orderDetails(database, session, orderId);
 }
 
-export function transitionOrder(database, session, orderId, input) {
-  const order = ownedOrderRow(database, session, orderId);
+export async function transitionOrder(database, session, orderId, input) {
+  const order = await ownedOrderRow(database, session, orderId);
   const targetStatus = cleanText(input?.status);
   const reason = cleanText(input?.reason);
 
@@ -207,7 +213,7 @@ export function transitionOrder(database, session, orderId, input) {
   if (targetStatus === order.status) {
     return {
       changed: false,
-      order: orderDetails(database, session, order.id),
+      order: await orderDetails(database, session, order.id),
     };
   }
 
@@ -224,8 +230,8 @@ export function transitionOrder(database, session, orderId, input) {
     });
   }
 
-  database.transaction(() => {
-    const result = database.run(
+  await database.transaction(async (transaction) => {
+    const result = await transaction.run(
       `UPDATE orders
        SET status = ?, updated_at = CURRENT_TIMESTAMP
        WHERE id = ? AND business_id = ? AND status = ?`,
@@ -239,7 +245,7 @@ export function transitionOrder(database, session, orderId, input) {
       throw conflict('The order changed while you were viewing it. Refresh and try again.');
     }
 
-    database.run(
+    await transaction.run(
       `INSERT INTO order_status_history
         (order_id, changed_by_user_id, from_status, to_status, reason)
        VALUES (?, ?, ?, ?, ?)`,
@@ -249,7 +255,7 @@ export function transitionOrder(database, session, orderId, input) {
       targetStatus,
       reason,
     );
-    database.run(
+    await transaction.run(
       `INSERT INTO audit_events
         (business_id, actor_user_id, action, resource_type, resource_id, metadata_json)
        VALUES (?, ?, 'order.status_changed', 'order', ?, ?)`,
@@ -262,6 +268,6 @@ export function transitionOrder(database, session, orderId, input) {
 
   return {
     changed: true,
-    order: orderDetails(database, session, order.id),
+    order: await orderDetails(database, session, order.id),
   };
 }
