@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Manage your Baytna home-business profile." />
+    <title>My business — Baytna</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/components.css" />
+    <link rel="stylesheet" href="/css/store.css" />
+  </head>
+  <body class="store-body">
+    <div class="store-shell">
+      <aside class="store-sidebar" id="store-sidebar">
+        <a class="store-sidebar__brand" href="/pages/store/dashboard.html">Baytna Store</a>
+
+        <p class="store-sidebar__label">Workspace</p>
+        <nav class="store-nav" aria-label="Store navigation">
+          <a href="/pages/store/dashboard.html">Overview</a>
+          <a class="active" href="/pages/store/business.html" aria-current="page">My business</a>
+          <a href="#" aria-disabled="true">Menu</a>
+          <a href="#" aria-disabled="true">Orders</a>
+          <a href="#" aria-disabled="true">Availability</a>
+        </nav>
+
+        <p class="store-sidebar__label">Account</p>
+        <nav class="store-nav" aria-label="Store account navigation">
+          <a href="#" aria-disabled="true">Documents</a>
+          <a href="#" aria-disabled="true">Profile &amp; settings</a>
+        </nav>
+
+        <div class="store-sidebar__footer">
+          <p class="store-user-email" id="store-user-email">Store account</p>
+          <button class="store-signout" id="store-signout" type="button">Sign out</button>
+        </div>
+      </aside>
+
+      <main class="store-main">
+        <header class="store-header">
+          <button
+            class="store-menu-button"
+            id="store-menu-button"
+            type="button"
+            aria-controls="store-sidebar"
+            aria-expanded="false"
+          >
+            Menu
+          </button>
+          <p class="store-header__context">Store management</p>
+          <p class="store-status" id="store-connection-status">Connected</p>
+        </header>
+
+        <div class="store-content">
+          <div class="store-heading">
+            <div>
+              <h1>My business</h1>
+              <p>Manage the information customers use to understand and find your business.</p>
+            </div>
+          </div>
+
+          <div class="business-alert" id="business-message" role="status" hidden></div>
+
+          <section class="business-status-card" aria-labelledby="application-status-title">
+            <div>
+              <p class="business-status-card__eyebrow">Application status</p>
+              <div class="business-status-card__title">
+                <h2 id="application-status-title">Loading…</h2>
+                <span class="business-status-badge" id="application-status-badge">Loading</span>
+              </div>
+              <p id="application-status-description">
+                Your profile status and missing information will appear here.
+              </p>
+              <p class="business-status-card__reason" id="application-status-reason" hidden></p>
+            </div>
+            <button class="btn-secondary" id="submit-application" type="button" disabled>
+              Submit for review
+            </button>
+          </section>
+
+          <form id="business-form" class="business-form" novalidate>
+            <fieldset class="business-form__section">
+              <legend>Business details</legend>
+              <p class="business-form__intro">Tell customers what your home business offers.</p>
+
+              <div class="business-form__grid">
+                <div class="business-field">
+                  <label for="business-name">Business name</label>
+                  <input
+                    class="input"
+                    id="business-name"
+                    name="name"
+                    type="text"
+                    minlength="2"
+                    maxlength="120"
+                    required
+                    aria-describedby="business-name-error"
+                  />
+                  <span class="error-text" id="business-name-error"></span>
+                </div>
+
+                <div class="business-field business-field--full">
+                  <label for="business-description">Description</label>
+                  <textarea
+                    id="business-description"
+                    name="description"
+                    maxlength="1000"
+                    placeholder="Describe your food, specialties, and what makes your business unique."
+                    aria-describedby="business-description-help business-description-error"
+                  ></textarea>
+                  <div class="business-field__meta">
+                    <span id="business-description-help">Maximum 1,000 characters</span>
+                    <span id="description-count">0 / 1000</span>
+                  </div>
+                  <span class="error-text" id="business-description-error"></span>
+                </div>
+              </div>
+            </fieldset>
+
+            <fieldset class="business-form__section">
+              <legend>Contact and location</legend>
+              <p class="business-form__intro">
+                This information is used for Store communication and order fulfillment.
+              </p>
+
+              <div class="business-form__grid">
+                <div class="business-field">
+                  <label for="contact-email">Contact email</label>
+                  <input
+                    class="input"
+                    id="contact-email"
+                    name="contactEmail"
+                    type="email"
+                    autocomplete="email"
+                    required
+                    aria-describedby="contact-email-error"
+                  />
+                  <span class="error-text" id="contact-email-error"></span>
+                </div>
+
+                <div class="business-field">
+                  <label for="phone">Phone number</label>
+                  <input
+                    class="input"
+                    id="phone"
+                    name="phone"
+                    type="tel"
+                    autocomplete="tel"
+                    placeholder="+968 9000 0000"
+                    maxlength="24"
+                    aria-describedby="phone-error"
+                  />
+                  <span class="error-text" id="phone-error"></span>
+                </div>
+
+                <div class="business-field business-field--full">
+                  <label for="address-line">Address</label>
+                  <input
+                    class="input"
+                    id="address-line"
+                    name="addressLine"
+                    type="text"
+                    autocomplete="street-address"
+                    placeholder="House, street, and area"
+                    maxlength="250"
+                    aria-describedby="address-line-error"
+                  />
+                  <span class="error-text" id="address-line-error"></span>
+                </div>
+
+                <div class="business-field">
+                  <label for="governorate">Governorate</label>
+                  <input
+                    class="input"
+                    id="governorate"
+                    name="governorate"
+                    type="text"
+                    placeholder="e.g. Muscat"
+                    maxlength="100"
+                    aria-describedby="governorate-error"
+                  />
+                  <span class="error-text" id="governorate-error"></span>
+                </div>
+
+                <div class="business-field">
+                  <label for="wilayat">Wilayat</label>
+                  <input
+                    class="input"
+                    id="wilayat"
+                    name="wilayat"
+                    type="text"
+                    placeholder="e.g. Seeb"
+                    maxlength="100"
+                    aria-describedby="wilayat-error"
+                  />
+                  <span class="error-text" id="wilayat-error"></span>
+                </div>
+
+                <div class="business-field business-field--full">
+                  <label for="service-areas">Service areas</label>
+                  <input
+                    class="input"
+                    id="service-areas"
+                    name="serviceAreas"
+                    type="text"
+                    placeholder="Al Mouj, Al Hail, Mawaleh"
+                    aria-describedby="service-areas-help service-areas-error"
+                  />
+                  <span class="business-field__help" id="service-areas-help">
+                    Separate areas with commas. Add up to 10.
+                  </span>
+                  <span class="error-text" id="service-areas-error"></span>
+                </div>
+              </div>
+            </fieldset>
+
+            <fieldset class="business-form__section">
+              <legend>Operating hours</legend>
+              <p class="business-form__intro">
+                Set the hours when customers can place orders with your business.
+              </p>
+
+              <div class="business-hours" id="business-hours">
+                <div class="business-hours__row" data-day="0">
+                  <strong>Sunday</strong>
+                  <label class="business-hours__closed">
+                    <input type="checkbox" data-hours-closed />
+                    Closed
+                  </label>
+                  <label>
+                    <span>Opens</span>
+                    <input class="input" type="time" data-hours-open />
+                  </label>
+                  <label>
+                    <span>Closes</span>
+                    <input class="input" type="time" data-hours-close />
+                  </label>
+                </div>
+                <div class="business-hours__row" data-day="1">
+                  <strong>Monday</strong>
+                  <label class="business-hours__closed">
+                    <input type="checkbox" data-hours-closed />
+                    Closed
+                  </label>
+                  <label>
+                    <span>Opens</span>
+                    <input class="input" type="time" data-hours-open />
+                  </label>
+                  <label>
+                    <span>Closes</span>
+                    <input class="input" type="time" data-hours-close />
+                  </label>
+                </div>
+                <div class="business-hours__row" data-day="2">
+                  <strong>Tuesday</strong>
+                  <label class="business-hours__closed">
+                    <input type="checkbox" data-hours-closed />
+                    Closed
+                  </label>
+                  <label>
+                    <span>Opens</span>
+                    <input class="input" type="time" data-hours-open />
+                  </label>
+                  <label>
+                    <span>Closes</span>
+                    <input class="input" type="time" data-hours-close />
+                  </label>
+                </div>
+                <div class="business-hours__row" data-day="3">
+                  <strong>Wednesday</strong>
+                  <label class="business-hours__closed">
+                    <input type="checkbox" data-hours-closed />
+                    Closed
+                  </label>
+                  <label>
+                    <span>Opens</span>
+                    <input class="input" type="time" data-hours-open />
+                  </label>
+                  <label>
+                    <span>Closes</span>
+                    <input class="input" type="time" data-hours-close />
+                  </label>
+                </div>
+                <div class="business-hours__row" data-day="4">
+                  <strong>Thursday</strong>
+                  <label class="business-hours__closed">
+                    <input type="checkbox" data-hours-closed />
+                    Closed
+                  </label>
+                  <label>
+                    <span>Opens</span>
+                    <input class="input" type="time" data-hours-open />
+                  </label>
+                  <label>
+                    <span>Closes</span>
+                    <input class="input" type="time" data-hours-close />
+                  </label>
+                </div>
+                <div class="business-hours__row" data-day="5">
+                  <strong>Friday</strong>
+                  <label class="business-hours__closed">
+                    <input type="checkbox" data-hours-closed />
+                    Closed
+                  </label>
+                  <label>
+                    <span>Opens</span>
+                    <input class="input" type="time" data-hours-open />
+                  </label>
+                  <label>
+                    <span>Closes</span>
+                    <input class="input" type="time" data-hours-close />
+                  </label>
+                </div>
+                <div class="business-hours__row" data-day="6">
+                  <strong>Saturday</strong>
+                  <label class="business-hours__closed">
+                    <input type="checkbox" data-hours-closed />
+                    Closed
+                  </label>
+                  <label>
+                    <span>Opens</span>
+                    <input class="input" type="time" data-hours-open />
+                  </label>
+                  <label>
+                    <span>Closes</span>
+                    <input class="input" type="time" data-hours-close />
+                  </label>
+                </div>
+              </div>
+              <span class="error-text" id="hours-error"></span>
+            </fieldset>
+
+            <fieldset class="business-form__section">
+              <legend>Temporary closure</legend>
+              <label class="business-switch">
+                <input id="temporarily-closed" name="isTemporarilyClosed" type="checkbox" />
+                <span>
+                  <strong>Temporarily close my business</strong>
+                  <small>Customers will not be able to place new orders.</small>
+                </span>
+              </label>
+              <div class="business-field" id="closure-note-field" hidden>
+                <label for="closure-note">Message for customers</label>
+                <input
+                  class="input"
+                  id="closure-note"
+                  name="closureNote"
+                  type="text"
+                  maxlength="250"
+                  placeholder="e.g. Closed until Sunday"
+                  aria-describedby="closure-note-error"
+                />
+                <span class="error-text" id="closure-note-error"></span>
+              </div>
+            </fieldset>
+
+            <div class="business-form__actions">
+              <p id="save-status">Changes are not saved automatically.</p>
+              <button class="btn-primary" id="save-business" type="submit">Save changes</button>
+            </div>
+          </form>
+        </div>
+      </main>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/store.js"></script>
+    <script src="/js/business.js"></script>
+  </body>
+</html>

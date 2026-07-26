@@ -1,0 +1,493 @@
+/* Standalone store-owner shell. It intentionally does not reuse the customer navbar. */
+
+.store-body {
+  min-height: 100vh;
+  background: #f8f7f2;
+}
+
+.store-shell {
+  display: grid;
+  grid-template-columns: 16rem minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.store-sidebar {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  padding: var(--space-4);
+  background: var(--text);
+  color: var(--surface);
+}
+
+.store-sidebar__brand {
+  padding: var(--space-2);
+  font-size: 1.35rem;
+  font-weight: 600;
+}
+
+.store-sidebar__label {
+  margin: var(--space-5) var(--space-2) var(--space-2);
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.store-nav {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.store-nav a {
+  padding: var(--space-2) var(--space-3);
+  color: rgba(255, 255, 255, 0.72);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+}
+
+.store-nav a:hover,
+.store-nav a.active {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--surface);
+}
+
+.store-sidebar__footer {
+  margin-top: auto;
+  padding: var(--space-3) var(--space-2) 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.store-user-email {
+  overflow: hidden;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.75rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.store-signout {
+  margin-top: var(--space-2);
+  padding: 0;
+  background: transparent;
+  color: var(--surface);
+  border: 0;
+  font: inherit;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.store-main {
+  min-width: 0;
+}
+
+.store-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-5);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.store-header__context {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.store-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.store-status::before {
+  width: 0.5rem;
+  height: 0.5rem;
+  background: var(--primary);
+  border-radius: 50%;
+  content: '';
+}
+
+.store-content {
+  padding: var(--space-5);
+}
+
+.store-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.store-heading p {
+  margin-top: var(--space-1);
+  color: var(--text-muted);
+}
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.metric-card {
+  padding: var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.metric-card__label {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.metric-card__value {
+  margin-top: var(--space-2);
+  font-size: 1.75rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.metric-card__note {
+  margin-top: var(--space-2);
+  color: var(--text-muted);
+  font-size: 0.7rem;
+}
+
+.store-section {
+  margin-top: var(--space-4);
+  padding: var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.store-section__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.store-section__header p {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.empty-state {
+  padding: var(--space-6) var(--space-4);
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  text-align: center;
+}
+
+.empty-state strong {
+  display: block;
+  margin-bottom: var(--space-1);
+}
+
+.empty-state p {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.store-menu-button {
+  display: none;
+}
+
+@media (max-width: 1000px) {
+  .metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .store-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .store-sidebar {
+    position: fixed;
+    z-index: 20;
+    width: min(17rem, 85vw);
+    transform: translateX(-100%);
+    transition: transform 0.2s ease;
+  }
+
+  .store-sidebar.open {
+    transform: translateX(0);
+  }
+
+  .store-menu-button {
+    display: inline-flex;
+    padding: var(--space-2);
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+  }
+
+  .store-header,
+  .store-content {
+    padding-inline: var(--space-3);
+  }
+
+  .store-heading {
+    align-items: start;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .metric-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* My Business */
+.business-alert {
+  margin-bottom: var(--space-4);
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+}
+
+.business-alert--success {
+  background: var(--primary-soft);
+}
+
+.business-alert--error {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.business-status-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+  padding: var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.business-status-card__eyebrow {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.business-status-card__title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-block: var(--space-1);
+}
+
+.business-status-card__title h2 {
+  font-size: 1.2rem;
+}
+
+.business-status-card > div > p:not(.business-status-card__eyebrow) {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.business-status-card__reason {
+  margin-top: var(--space-2);
+  color: var(--on-accent) !important;
+}
+
+.business-status-badge {
+  padding: var(--space-1) var(--space-2);
+  background: var(--bg);
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.business-status-badge[data-status='approved'] {
+  background: var(--primary-soft);
+}
+
+.business-status-badge[data-status='rejected'],
+.business-status-badge[data-status='suspended'] {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.business-status-badge[data-status='pending'] {
+  background: var(--lilac);
+}
+
+.business-form {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.business-form__section {
+  min-width: 0;
+  padding: var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.business-form__section legend {
+  padding-inline: var(--space-1);
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.business-form__intro {
+  margin-bottom: var(--space-4);
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.business-form__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.business-field {
+  display: grid;
+  align-content: start;
+  gap: var(--space-1);
+}
+
+.business-field--full {
+  grid-column: 1 / -1;
+}
+
+.business-field label,
+.business-hours label {
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.business-field__help,
+.business-field__meta,
+.business-form__actions p {
+  color: var(--text-muted);
+  font-size: 0.7rem;
+}
+
+.business-field__meta {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.business-hours {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.business-hours__row {
+  display: grid;
+  grid-template-columns: minmax(6rem, 1fr) auto minmax(7rem, 0.8fr) minmax(7rem, 0.8fr);
+  align-items: end;
+  gap: var(--space-3);
+  padding-block: var(--space-2);
+  border-bottom: 1px solid var(--border);
+}
+
+.business-hours__row:last-child {
+  border-bottom: 0;
+}
+
+.business-hours__row > label:not(.business-hours__closed) {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.business-hours__closed,
+.business-switch {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.business-hours input[type='checkbox'],
+.business-switch input {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--primary);
+}
+
+.business-switch {
+  width: fit-content;
+  cursor: pointer;
+}
+
+.business-switch strong,
+.business-switch small {
+  display: block;
+}
+
+.business-switch small {
+  color: var(--text-muted);
+}
+
+#closure-note-field {
+  margin-top: var(--space-3);
+}
+
+.business-form__actions {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  backdrop-filter: blur(10px);
+}
+
+@media (max-width: 760px) {
+  .business-status-card {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .business-form__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .business-field--full {
+    grid-column: auto;
+  }
+
+  .business-hours__row {
+    grid-template-columns: 1fr auto;
+  }
+
+  .business-hours__row > label:not(.business-hours__closed) {
+    grid-column: span 1;
+  }
+
+  .business-form__actions {
+    justify-content: space-between;
+  }
+}
