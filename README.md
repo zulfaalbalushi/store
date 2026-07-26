@@ -111,6 +111,15 @@ Orders will appear automatically after this Store backend and the customer backe
 the same hosted database. While this branch uses local SQLite, test orders must be inserted locally;
 this branch does not create customer orders.
 
+## Profile & Settings
+
+The minimal personal-account page lets a Store owner update their full name and change their
+password. The login email is read-only until email verification is implemented. Password changes
+verify the current password, preserve the current session, invalidate other sessions, and write an
+audit event. A compact Dark mode On/Off control appears at the top-left of Profile & Settings; its
+choice is saved in the current browser and applied across the Store portal. Business-facing
+information remains under **My Business**.
+
 ## API
 
 Check server and database readiness:

@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Manage your Baytna Store personal account." />
+    <title>Profile &amp; settings — Baytna</title>
+    <script src="/js/theme.js"></script>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/components.css" />
+    <link rel="stylesheet" href="/css/store.css" />
+  </head>
+  <body class="store-body">
+    <div class="store-shell">
+      <aside class="store-sidebar" id="store-sidebar">
+        <a class="store-sidebar__brand" href="/pages/store/dashboard.html">Baytna Store</a>
+
+        <p class="store-sidebar__label">Workspace</p>
+        <nav class="store-nav" aria-label="Store navigation">
+          <a href="/pages/store/dashboard.html">Overview</a>
+          <a href="/pages/store/business.html">My business</a>
+          <a href="/pages/store/menu.html">Menu</a>
+          <a href="/pages/store/orders.html">Orders</a>
+        </nav>
+
+        <p class="store-sidebar__label">Account</p>
+        <nav class="store-nav" aria-label="Store account navigation">
+          <a href="#" aria-disabled="true">Documents</a>
+          <a class="active" href="/pages/store/profile.html" aria-current="page">
+            Profile &amp; settings
+          </a>
+        </nav>
+
+        <div class="store-sidebar__footer">
+          <p class="store-user-email" id="store-user-email">Store account</p>
+          <button class="store-signout" id="store-signout" type="button">Sign out</button>
+        </div>
+      </aside>
+
+      <main class="store-main">
+        <header class="store-header">
+          <div class="store-header__actions">
+            <button
+              class="store-menu-button"
+              id="store-menu-button"
+              type="button"
+              aria-controls="store-sidebar"
+              aria-expanded="false"
+            >
+              Menu
+            </button>
+            <button class="theme-toggle" id="dark-mode-toggle" type="button" aria-pressed="false">
+              Dark mode: Off
+            </button>
+          </div>
+          <p class="store-header__context">Store management</p>
+          <p class="store-status">Connected</p>
+        </header>
+
+        <div class="store-content profile-content">
+          <div class="store-heading">
+            <div>
+              <h1>Profile &amp; settings</h1>
+              <p>Manage your personal Store-owner account.</p>
+            </div>
+          </div>
+
+          <div
+            class="business-alert"
+            id="profile-message"
+            role="status"
+            aria-live="polite"
+            hidden
+          ></div>
+
+          <div class="profile-grid">
+            <form class="profile-card" id="profile-form" novalidate>
+              <div>
+                <h2>Personal profile</h2>
+                <p>Your login identity. Business details are managed separately.</p>
+              </div>
+
+              <div class="business-field">
+                <label for="profile-full-name">Full name</label>
+                <input
+                  class="input"
+                  id="profile-full-name"
+                  type="text"
+                  autocomplete="name"
+                  minlength="2"
+                  maxlength="100"
+                  required
+                  aria-describedby="profile-full-name-error"
+                />
+                <span class="error-text" id="profile-full-name-error"></span>
+              </div>
+
+              <div class="business-field">
+                <label for="profile-email">Login email</label>
+                <input
+                  class="input"
+                  id="profile-email"
+                  type="email"
+                  autocomplete="email"
+                  readonly
+                  aria-describedby="profile-email-help"
+                />
+                <span class="business-field__help" id="profile-email-help">
+                  Email changes are not available in this MVP.
+                </span>
+              </div>
+
+              <div class="profile-card__actions">
+                <button class="btn-primary" id="save-profile" type="submit">Save name</button>
+              </div>
+            </form>
+
+            <form class="profile-card" id="password-form" novalidate>
+              <div>
+                <h2>Change password</h2>
+                <p>Use between 8 and 128 characters.</p>
+              </div>
+
+              <div class="business-field">
+                <label for="current-password">Current password</label>
+                <input
+                  class="input"
+                  id="current-password"
+                  type="password"
+                  autocomplete="current-password"
+                  required
+                  aria-describedby="current-password-error"
+                />
+                <span class="error-text" id="current-password-error"></span>
+              </div>
+
+              <div class="business-field">
+                <label for="new-password">New password</label>
+                <input
+                  class="input"
+                  id="new-password"
+                  type="password"
+                  autocomplete="new-password"
+                  minlength="8"
+                  maxlength="128"
+                  required
+                  aria-describedby="new-password-error"
+                />
+                <span class="error-text" id="new-password-error"></span>
+              </div>
+
+              <div class="business-field">
+                <label for="confirm-password">Confirm new password</label>
+                <input
+                  class="input"
+                  id="confirm-password"
+                  type="password"
+                  autocomplete="new-password"
+                  minlength="8"
+                  maxlength="128"
+                  required
+                  aria-describedby="confirm-password-error"
+                />
+                <span class="error-text" id="confirm-password-error"></span>
+              </div>
+
+              <div class="profile-card__actions">
+                <button class="btn-primary" id="save-password" type="submit">
+                  Change password
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/store.js"></script>
+    <script src="/js/profile.js"></script>
+  </body>
+</html>

@@ -6,6 +6,7 @@ import { Readable } from 'node:stream';
 import test from 'node:test';
 
 import { createApiRouter } from '../server/api/router.js';
+import { getOwnedAccount } from '../server/account/service.js';
 import { createRequestHandler } from '../server/app.js';
 import { createSession } from '../server/auth/session.js';
 import { getOwnedBusiness, updateOwnedBusiness } from '../server/business/service.js';
@@ -277,6 +278,130 @@ test('Store authentication persists in a cookie and rejects duplicate accounts',
   }
 });
 
+test('Profile settings update the owner name and securely change the password', async () => {
+  const application = await testApplication();
+
+  try {
+    const account = {
+      fullName: 'Aisha Al Balushi',
+      businessName: 'Bait Al Shuwa',
+      email: 'profile@example.com',
+      password: 'strong-password',
+    };
+    const registration = await performRequest(application.handler, '/api/v1/auth/store/register', {
+      method: 'POST',
+      body: account,
+    });
+    const registrationPayload = json(registration);
+    const cookie = cookieFrom(registration);
+    const otherSession = await performRequest(application.handler, '/api/v1/auth/store/sign-in', {
+      method: 'POST',
+      body: { email: account.email, password: account.password },
+    });
+    const otherCookie = cookieFrom(otherSession);
+
+    const profile = await performRequest(application.handler, '/api/v1/store/account', {
+      headers: { cookie },
+    });
+    assert.equal(profile.status, 200);
+    assert.deepEqual(json(profile).data.account, {
+      email: account.email,
+      fullName: account.fullName,
+      userId: registrationPayload.data.account.userId,
+    });
+
+    const missingCsrf = await performRequest(application.handler, '/api/v1/store/account', {
+      method: 'PUT',
+      headers: { cookie },
+      body: { fullName: 'Updated Owner' },
+    });
+    assert.equal(missingCsrf.status, 403);
+
+    const update = await performRequest(application.handler, '/api/v1/store/account', {
+      method: 'PUT',
+      headers: {
+        cookie,
+        'x-csrf-token': registrationPayload.data.csrfToken,
+      },
+      body: {
+        email: 'cannot-change@example.com',
+        fullName: 'Updated Owner',
+      },
+    });
+    assert.equal(update.status, 200);
+    assert.equal(json(update).data.account.fullName, 'Updated Owner');
+    assert.equal(json(update).data.account.email, account.email);
+
+    const wrongPassword = await performRequest(
+      application.handler,
+      '/api/v1/store/account/password',
+      {
+        method: 'POST',
+        headers: {
+          cookie,
+          'x-csrf-token': registrationPayload.data.csrfToken,
+        },
+        body: {
+          currentPassword: 'wrong-password',
+          newPassword: 'replacement-password',
+        },
+      },
+    );
+    assert.equal(wrongPassword.status, 422);
+    assert.ok(json(wrongPassword).error.details.currentPassword);
+
+    const passwordChange = await performRequest(
+      application.handler,
+      '/api/v1/store/account/password',
+      {
+        method: 'POST',
+        headers: {
+          cookie,
+          'x-csrf-token': registrationPayload.data.csrfToken,
+        },
+        body: {
+          currentPassword: account.password,
+          newPassword: 'replacement-password',
+        },
+      },
+    );
+    assert.equal(passwordChange.status, 200);
+    assert.equal(json(passwordChange).data.changed, true);
+
+    const currentSession = await performRequest(application.handler, '/api/v1/auth/session', {
+      headers: { cookie },
+    });
+    assert.equal(currentSession.status, 200);
+    assert.equal(json(currentSession).data.account.fullName, 'Updated Owner');
+
+    const invalidatedSession = await performRequest(application.handler, '/api/v1/auth/session', {
+      headers: { cookie: otherCookie },
+    });
+    assert.equal(invalidatedSession.status, 401);
+
+    const oldPassword = await performRequest(application.handler, '/api/v1/auth/store/sign-in', {
+      method: 'POST',
+      body: { email: account.email, password: account.password },
+    });
+    assert.equal(oldPassword.status, 401);
+
+    const newPassword = await performRequest(application.handler, '/api/v1/auth/store/sign-in', {
+      method: 'POST',
+      body: { email: account.email, password: 'replacement-password' },
+    });
+    assert.equal(newPassword.status, 200);
+    assert.equal(
+      application.database.get(
+        "SELECT COUNT(*) AS count FROM audit_events WHERE actor_user_id = ? AND action LIKE 'account.%'",
+        registrationPayload.data.account.userId,
+      ).count,
+      2,
+    );
+  } finally {
+    await application.close();
+  }
+});
+
 test('ownership checks reject a mismatched owner and business pair', async () => {
   const application = await testApplication();
 
@@ -303,6 +428,15 @@ test('ownership checks reject a mismatched owner and business pair', async () =>
     assert.throws(
       () =>
         getOwnedBusiness(application.database, {
+          business_id: json(second).data.account.businessId,
+          user_id: json(first).data.account.userId,
+        }),
+      (error) => error.status === 404,
+    );
+
+    assert.throws(
+      () =>
+        getOwnedAccount(application.database, {
           business_id: json(second).data.account.businessId,
           user_id: json(first).data.account.userId,
         }),

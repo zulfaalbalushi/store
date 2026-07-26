@@ -1,4 +1,5 @@
 import { signInStoreOwner, registerStoreOwner } from '../auth/service.js';
+import { changeOwnedPassword, getOwnedAccount, updateOwnedAccount } from '../account/service.js';
 import { createRateLimiter } from '../auth/rate-limit.js';
 import {
   deleteSession,
@@ -92,6 +93,34 @@ export function createApiRouter({ config, database }) {
       sendSuccess(response, { signedOut: true }, 200, {
         'Set-Cookie': expiredSessionCookie(isProduction),
       });
+      return true;
+    }
+
+    if (requestUrl.pathname === '/api/v1/store/account') {
+      const session = requireStoreSession(database, request, config.sessionSecret);
+
+      if (request.method === 'GET') {
+        sendSuccess(response, { account: getOwnedAccount(database, session) });
+        return true;
+      }
+
+      if (request.method === 'PUT') {
+        requireCsrf(request, session);
+        const input = await readJsonBody(request);
+        sendSuccess(response, { account: updateOwnedAccount(database, session, input) });
+        return true;
+      }
+
+      throw methodNotAllowed();
+    }
+
+    if (requestUrl.pathname === '/api/v1/store/account/password') {
+      requireMethod(request, 'POST');
+      const session = requireStoreSession(database, request, config.sessionSecret);
+      requireCsrf(request, session);
+      authenticationRateLimiter.check(request, 'store-password-change');
+      const input = await readJsonBody(request);
+      sendSuccess(response, await changeOwnedPassword(database, session, input));
       return true;
     }
 
