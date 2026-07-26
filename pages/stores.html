@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stores | Baytna</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/pages.css">
+</head>
+<body>
+
+  <!-- Include partials/navbar.html here -->
+
+  <main class="container">
+
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="breadcrumb-sep">/</span>
+      <span class="breadcrumb-current" aria-current="page">Stores</span>
+    </nav>
+
+    <h1 style="margin-bottom: var(--space-2);">Explore Our Stores</h1>
+    <p style="color: var(--text-muted); margin-bottom: var(--space-5);">
+      Discover homemade food stores across Oman offering authentic Omani dishes.
+    </p>
+
+    <!-- Featured store -->
+    <section class="featured-cook" aria-labelledby="featured-store-name">
+      <div>
+        <div class="featured-cook-header">
+          <!-- Once a store uploads a logo, replace this placeholder with:
+               <img class="store-logo" src="../images/stores/baytna-kitchen-logo.jpg" alt="Baytna Kitchen logo"> -->
+          <div class="store-logo-placeholder" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 9V20a1 1 0 001 1h14a1 1 0 001-1V9M3 9l1.5-5h15L21 9M3 9h18M9 21v-6h6v6"/></svg>
+          </div>
+          <div>
+            <span class="featured-cook-eyebrow">Featured Store</span>
+            <h2 id="featured-store-name" class="featured-cook-name">Baytna Kitchen</h2>
+            <p class="featured-cook-meta">Muscat · 4.9 ★ · 28 menu items</p>
+          </div>
+        </div>
+        <p class="featured-cook-bio">
+          Serving authentic homemade Omani meals prepared daily using fresh
+          local ingredients.
+        </p>
+      </div>
+      <a href="store-profile.html" class="btn-primary">View Store</a>
+    </section>
+
+    <!-- Search + filters -->
+    <div class="cooks-toolbar">
+      <label class="sr-only" for="store-search">Search stores</label>
+      <input
+        class="input cooks-search"
+        type="search"
+        id="store-search"
+        placeholder="Search stores..."
+      >
+
+      <div class="area-filters" role="group" aria-label="Filter stores by area">
+        <button type="button" class="chip active" data-area="all">All Stores</button>
+        <button type="button" class="chip" data-area="Muscat">Muscat</button>
+        <button type="button" class="chip" data-area="Nizwa">Nizwa</button>
+        <button type="button" class="chip" data-area="Salalah">Salalah</button>
+        <button type="button" class="chip" data-area="Sohar">Sohar</button>
+        <button type="button" class="chip" data-area="Sur">Sur</button>
+      </div>
+    </div>
+
+    <!-- Store grid -->
+    <section class="grid cooks-grid" id="stores-grid" aria-label="All stores">
+
+      <article class="card cook-card" data-name="Baytna Kitchen" data-area="Muscat">
+        <div class="store-card-header">
+          <!-- Once this store uploads a logo, replace with:
+               <img class="store-logo" src="../images/stores/baytna-kitchen-logo.jpg" alt="Baytna Kitchen logo"> -->
+          <div class="store-logo-placeholder" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 9V20a1 1 0 001 1h14a1 1 0 001-1V9M3 9l1.5-5h15L21 9M3 9h18M9 21v-6h6v6"/></svg>
+          </div>
+          <div class="store-card-header-text">
+            <h3 class="cook-card-name">Baytna Kitchen</h3>
+            <p class="cook-card-area">Muscat</p>
+          </div>
+        </div>
+        <div class="cook-card-meta-row">
+          <span class="rating"><span class="rating-score">4.9</span></span>
+          <span>·</span>
+          <span>28 Menu Items</span>
+        </div>
+        <p class="cook-card-bio">Traditional homemade Omani meals made fresh every day.</p>
+        <a href="store-profile.html" class="btn-secondary">View Store</a>
+      </article>
+
+      <article class="card cook-card" data-name="Nizwa Home Bites" data-area="Nizwa">
+        <div class="store-card-header">
+          <!-- Once this store uploads a logo, replace with:
+               <img class="store-logo" src="../images/stores/nizwa-home-bites-logo.jpg" alt="Nizwa Home Bites logo"> -->
+          <div class="store-logo-placeholder" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 9V20a1 1 0 001 1h14a1 1 0 001-1V9M3 9l1.5-5h15L21 9M3 9h18M9 21v-6h6v6"/></svg>
+          </div>
+          <div class="store-card-header-text">
+            <h3 class="cook-card-name">Nizwa Home Bites</h3>
+            <p class="cook-card-area">Nizwa</p>
+          </div>
+        </div>
+        <div class="cook-card-meta-row">
+          <span class="rating"><span class="rating-score">4.8</span></span>
+          <span>·</span>
+          <span>18 Menu Items</span>
+        </div>
+        <p class="cook-card-bio">Slow-cooked rice dishes made with spices ground fresh in-house.</p>
+        <a href="store-profile.html" class="btn-secondary">View Store</a>
+      </article>
+
+      <article class="card cook-card" data-name="Salalah Sweets & Bites" data-area="Salalah">
+        <div class="store-card-header">
+          <!-- Once this store uploads a logo, replace with:
+               <img class="store-logo" src="../images/stores/salalah-sweets-andamp;-bites-logo.jpg" alt="Salalah Sweets &amp; Bites logo"> -->
+          <div class="store-logo-placeholder" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 9V20a1 1 0 001 1h14a1 1 0 001-1V9M3 9l1.5-5h15L21 9M3 9h18M9 21v-6h6v6"/></svg>
+          </div>
+          <div class="store-card-header-text">
+            <h3 class="cook-card-name">Salalah Sweets &amp; Bites</h3>
+            <p class="cook-card-area">Salalah</p>
+          </div>
+        </div>
+        <div class="cook-card-meta-row">
+          <span class="rating"><span class="rating-score">4.8</span></span>
+          <span>·</span>
+          <span>12 Menu Items</span>
+        </div>
+        <p class="cook-card-bio">Known for luqaimat and other Omani sweets made fresh to order.</p>
+        <a href="store-profile.html" class="btn-secondary">View Store</a>
+      </article>
+
+      <article class="card cook-card" data-name="Sohar Coastal Kitchen" data-area="Sohar">
+        <div class="store-card-header">
+          <!-- Once this store uploads a logo, replace with:
+               <img class="store-logo" src="../images/stores/sohar-coastal-kitchen-logo.jpg" alt="Sohar Coastal Kitchen logo"> -->
+          <div class="store-logo-placeholder" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 9V20a1 1 0 001 1h14a1 1 0 001-1V9M3 9l1.5-5h15L21 9M3 9h18M9 21v-6h6v6"/></svg>
+          </div>
+          <div class="store-card-header-text">
+            <h3 class="cook-card-name">Sohar Coastal Kitchen</h3>
+            <p class="cook-card-area">Sohar</p>
+          </div>
+        </div>
+        <div class="cook-card-meta-row">
+          <span class="rating"><span class="rating-score">4.6</span></span>
+          <span>·</span>
+          <span>9 Menu Items</span>
+        </div>
+        <p class="cook-card-bio">Coastal specialties, including fresh grilled kingfish mashuai.</p>
+        <a href="store-profile.html" class="btn-secondary">View Store</a>
+      </article>
+
+      <article class="card cook-card" data-name="Sur Family Table" data-area="Sur">
+        <div class="store-card-header">
+          <!-- Once this store uploads a logo, replace with:
+               <img class="store-logo" src="../images/stores/sur-family-table-logo.jpg" alt="Sur Family Table logo"> -->
+          <div class="store-logo-placeholder" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 9V20a1 1 0 001 1h14a1 1 0 001-1V9M3 9l1.5-5h15L21 9M3 9h18M9 21v-6h6v6"/></svg>
+          </div>
+          <div class="store-card-header-text">
+            <h3 class="cook-card-name">Sur Family Table</h3>
+            <p class="cook-card-area">Sur</p>
+          </div>
+        </div>
+        <div class="cook-card-meta-row">
+          <span class="rating"><span class="rating-score">4.9</span></span>
+          <span>·</span>
+          <span>15 Menu Items</span>
+        </div>
+        <p class="cook-card-bio">Hearty harees and slow-cooked comfort food for the whole family.</p>
+        <a href="store-profile.html" class="btn-secondary">View Store</a>
+      </article>
+
+      <article class="card cook-card" data-name="Muscat Everyday Eats" data-area="Muscat">
+        <div class="store-card-header">
+          <!-- Once this store uploads a logo, replace with:
+               <img class="store-logo" src="../images/stores/muscat-everyday-eats-logo.jpg" alt="Muscat Everyday Eats logo"> -->
+          <div class="store-logo-placeholder" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 9V20a1 1 0 001 1h14a1 1 0 001-1V9M3 9l1.5-5h15L21 9M3 9h18M9 21v-6h6v6"/></svg>
+          </div>
+          <div class="store-card-header-text">
+            <h3 class="cook-card-name">Muscat Everyday Eats</h3>
+            <p class="cook-card-area">Muscat</p>
+          </div>
+        </div>
+        <div class="cook-card-meta-row">
+          <span class="rating"><span class="rating-score">4.5</span></span>
+          <span>·</span>
+          <span>11 Menu Items</span>
+        </div>
+        <p class="cook-card-bio">Everyday Omani home cooking, from majboos to fresh baked bread.</p>
+        <a href="store-profile.html" class="btn-secondary">View Store</a>
+      </article>
+
+    </section>
+
+    <p class="cooks-empty" id="stores-empty" hidden>No stores match your search. Try a different name or area.</p>
+
+  </main>
+
+  <!-- Include partials/footer.html here -->
+
+  <script>
+    // Client-side search + area-filter for the store grid.
+    // Both filters combine (AND): a card must match the search text
+    // AND the selected area chip to stay visible.
+    (function () {
+      const searchInput = document.getElementById('store-search');
+      const filterChips = document.querySelectorAll('.area-filters .chip');
+      const storeCards = document.querySelectorAll('#stores-grid .cook-card');
+      const emptyState = document.getElementById('stores-empty');
+
+      let activeArea = 'all';
+
+      function applyFilters() {
+        const query = searchInput.value.trim().toLowerCase();
+        let visibleCount = 0;
+
+        storeCards.forEach((card) => {
+          const name = card.dataset.name.toLowerCase();
+          const area = card.dataset.area;
+
+          const matchesQuery = name.includes(query) || area.toLowerCase().includes(query);
+          const matchesArea = activeArea === 'all' || area === activeArea;
+          const isVisible = matchesQuery && matchesArea;
+
+          card.style.display = isVisible ? '' : 'none';
+          if (isVisible) visibleCount += 1;
+        });
+
+        emptyState.hidden = visibleCount !== 0;
+      }
+
+      searchInput.addEventListener('input', applyFilters);
+
+      filterChips.forEach((chip) => {
+        chip.addEventListener('click', () => {
+          filterChips.forEach((c) => c.classList.remove('active'));
+          chip.classList.add('active');
+          activeArea = chip.dataset.area;
+          applyFilters();
+        });
+      });
+    })();
+  </script>
+
+</body>
+</html>

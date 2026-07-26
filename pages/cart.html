@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Cart | Baytna</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/pages.css">
+</head>
+<body>
+
+  <!-- Include partials/navbar.html here -->
+
+  <main class="container">
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="breadcrumb-sep">/</span>
+      <span class="breadcrumb-current" aria-current="page">Your Cart</span>
+    </nav>
+
+    <h1 style="margin-bottom: var(--space-4);">Your Cart</h1>
+
+    <!-- ==========================================================
+         FILLED STATE
+         Toggle: hide this <section> and unhide #cart-empty-state
+         below to preview the empty cart. In production this swap
+         happens automatically based on cart contents (see script).
+         ========================================================== -->
+    <section id="cart-filled-state" class="cart-layout">
+
+      <!-- Cart items -->
+      <div class="cart-items" id="cart-items" aria-label="Items in your cart">
+
+        <article class="card cart-item" data-unit-price="3.500" data-line-id="item-1">
+          <img
+            class="cart-item-image"
+            src="../images/dishes/chicken-majboos.jpg"
+            alt="Chicken Majboos"
+          >
+          <div>
+            <h2 class="cart-item-name">Chicken Majboos</h2>
+            <p class="cart-item-cook">By Mariam Al-Balushi</p>
+            <p class="cart-item-unit-price">OMR 3.500 each</p>
+          </div>
+          <div class="cart-item-controls">
+            <span class="cart-item-line-price" data-line-price>OMR 7.000</span>
+            <div class="quantity-selector">
+              <button type="button" class="quantity-btn" data-qty-decrease aria-label="Decrease quantity of Chicken Majboos">&minus;</button>
+              <span class="quantity-value" data-qty-value aria-live="polite">2</span>
+              <button type="button" class="quantity-btn" data-qty-increase aria-label="Increase quantity of Chicken Majboos">+</button>
+            </div>
+            <button type="button" class="cart-item-remove" data-remove-item>Remove</button>
+          </div>
+        </article>
+
+        <article class="card cart-item" data-unit-price="6.250" data-line-id="item-2">
+          <img
+            class="cart-item-image"
+            src="../images/dishes/shuwa.jpg"
+            alt="Shuwa"
+          >
+          <div>
+            <h2 class="cart-item-name">Shuwa</h2>
+            <p class="cart-item-cook">By Salim Al-Farsi</p>
+            <p class="cart-item-unit-price">OMR 6.250 each</p>
+          </div>
+          <div class="cart-item-controls">
+            <span class="cart-item-line-price" data-line-price>OMR 6.250</span>
+            <div class="quantity-selector">
+              <button type="button" class="quantity-btn" data-qty-decrease aria-label="Decrease quantity of Shuwa">&minus;</button>
+              <span class="quantity-value" data-qty-value aria-live="polite">1</span>
+              <button type="button" class="quantity-btn" data-qty-increase aria-label="Increase quantity of Shuwa">+</button>
+            </div>
+            <button type="button" class="cart-item-remove" data-remove-item>Remove</button>
+          </div>
+        </article>
+
+        <article class="card cart-item" data-unit-price="1.800" data-line-id="item-3">
+          <img
+            class="cart-item-image"
+            src="../images/dishes/luqaimat.jpg"
+            alt="Luqaimat"
+          >
+          <div>
+            <h2 class="cart-item-name">Luqaimat</h2>
+            <p class="cart-item-cook">By Aisha Al-Kindi</p>
+            <p class="cart-item-unit-price">OMR 1.800 each</p>
+          </div>
+          <div class="cart-item-controls">
+            <span class="cart-item-line-price" data-line-price>OMR 1.800</span>
+            <div class="quantity-selector">
+              <button type="button" class="quantity-btn" data-qty-decrease aria-label="Decrease quantity of Luqaimat">&minus;</button>
+              <span class="quantity-value" data-qty-value aria-live="polite">1</span>
+              <button type="button" class="quantity-btn" data-qty-increase aria-label="Increase quantity of Luqaimat">+</button>
+            </div>
+            <button type="button" class="cart-item-remove" data-remove-item>Remove</button>
+          </div>
+        </article>
+
+      </div>
+
+      <!-- Order summary -->
+      <aside class="order-summary" aria-labelledby="order-summary-title">
+        <h2 id="order-summary-title" class="order-summary-title">Order Summary</h2>
+
+        <div class="order-summary-row is-muted">
+          <span>Subtotal</span>
+          <span id="summary-subtotal">OMR 15.050</span>
+        </div>
+        <div class="order-summary-row is-muted">
+          <span>Delivery Fee</span>
+          <span id="summary-delivery">OMR 1.000</span>
+        </div>
+
+        <hr class="order-summary-divider">
+
+        <div class="order-summary-row order-summary-total">
+          <span>Total</span>
+          <span id="summary-total">OMR 16.050</span>
+        </div>
+
+        <a href="checkout.html" class="btn-primary" id="checkout-btn">Continue to Checkout</a>
+      </aside>
+
+    </section>
+
+    <!-- ==========================================================
+         EMPTY STATE
+         Hidden by default; shown by the script below when the cart
+         has no items (or preview it by removing "hidden" from this
+         section and hiding #cart-filled-state above).
+         ========================================================== -->
+    <section id="cart-empty-state" class="cart-empty" hidden>
+      <svg class="cart-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+        <circle cx="9" cy="20" r="1.4" fill="currentColor" stroke="none"/>
+        <circle cx="18" cy="20" r="1.4" fill="currentColor" stroke="none"/>
+        <path d="M2.5 3h2l2.2 11.4a2 2 0 002 1.6h8.6a2 2 0 002-1.6L21 7H6.2"/>
+      </svg>
+      <h2 class="cart-empty-title">Your cart is empty</h2>
+      <p class="cart-empty-text">
+        Looks like you haven't added any homemade dishes yet. Explore what
+        Omani home cooks near you are making today.
+      </p>
+      <a href="cooks.html" class="btn-primary">Browse Dishes</a>
+    </section>
+
+  </main>
+
+  <!-- Include partials/footer.html here -->
+
+  <script>
+    // Cart quantity, remove, and totals logic.
+    // Reads price/quantity straight from the DOM (data attributes) so this
+    // works as a standalone demo; swap the DOM reads for your real cart
+    // state/API once the backend is wired up.
+    (function () {
+      const DELIVERY_FEE = 1.0;
+
+      const filledState = document.getElementById('cart-filled-state');
+      const emptyState = document.getElementById('cart-empty-state');
+      const itemsContainer = document.getElementById('cart-items');
+      const subtotalEl = document.getElementById('summary-subtotal');
+      const deliveryEl = document.getElementById('summary-delivery');
+      const totalEl = document.getElementById('summary-total');
+
+      function formatPrice(amount) {
+        return `OMR ${amount.toFixed(3)}`;
+      }
+
+      function getItems() {
+        return Array.from(itemsContainer.querySelectorAll('.cart-item'));
+      }
+
+      function updateLineItem(itemEl) {
+        const unitPrice = parseFloat(itemEl.dataset.unitPrice);
+        const qty = parseInt(itemEl.querySelector('[data-qty-value]').textContent, 10);
+        itemEl.querySelector('[data-line-price]').textContent = formatPrice(unitPrice * qty);
+      }
+
+      function updateSummary() {
+        const items = getItems();
+
+        if (items.length === 0) {
+          filledState.hidden = true;
+          emptyState.hidden = false;
+          return;
+        }
+
+        filledState.hidden = false;
+        emptyState.hidden = true;
+
+        const subtotal = items.reduce((sum, itemEl) => {
+          const unitPrice = parseFloat(itemEl.dataset.unitPrice);
+          const qty = parseInt(itemEl.querySelector('[data-qty-value]').textContent, 10);
+          return sum + unitPrice * qty;
+        }, 0);
+
+        const total = subtotal + DELIVERY_FEE;
+
+        subtotalEl.textContent = formatPrice(subtotal);
+        deliveryEl.textContent = formatPrice(DELIVERY_FEE);
+        totalEl.textContent = formatPrice(total);
+      }
+
+      itemsContainer.addEventListener('click', (event) => {
+        const itemEl = event.target.closest('.cart-item');
+        if (!itemEl) return;
+
+        if (event.target.matches('[data-qty-increase]')) {
+          const qtyEl = itemEl.querySelector('[data-qty-value]');
+          qtyEl.textContent = parseInt(qtyEl.textContent, 10) + 1;
+          updateLineItem(itemEl);
+          updateSummary();
+        }
+
+        if (event.target.matches('[data-qty-decrease]')) {
+          const qtyEl = itemEl.querySelector('[data-qty-value]');
+          const current = parseInt(qtyEl.textContent, 10);
+          if (current > 1) {
+            qtyEl.textContent = current - 1;
+            updateLineItem(itemEl);
+            updateSummary();
+          }
+        }
+
+        if (event.target.matches('[data-remove-item]')) {
+          itemEl.remove();
+          updateSummary();
+        }
+      });
+
+      updateSummary();
+    })();
+  </script>
+
+</body>
+</html>

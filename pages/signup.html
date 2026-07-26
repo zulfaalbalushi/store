@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up | Baytna</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/pages.css">
+</head>
+<body>
+
+  <!-- Include partials/navbar.html here -->
+
+  <main class="container">
+    <section class="auth-page">
+      <div class="auth-card">
+        <h1 class="auth-title">Create your account</h1>
+        <p class="auth-subtitle">Join Baytna and taste homemade Omani food from real home cooks.</p>
+
+        <form class="auth-form" id="signup-form" novalidate>
+          <div class="form-group">
+            <label for="signup-name">Full Name</label>
+            <input class="input" type="text" id="signup-name" name="fullName" autocomplete="name" required>
+          </div>
+
+          <div class="form-group">
+            <label for="signup-email">Email</label>
+            <input class="input" type="email" id="signup-email" name="email" autocomplete="email" required>
+          </div>
+
+          <div class="form-group">
+            <label for="signup-phone">Phone Number</label>
+            <input class="input" type="tel" id="signup-phone" name="phone" autocomplete="tel" placeholder="+968 9XXX XXXX" required>
+          </div>
+
+          <div class="form-group">
+            <label for="signup-password">Password</label>
+            <input class="input" type="password" id="signup-password" name="password" autocomplete="new-password" minlength="8" required>
+          </div>
+
+          <div class="form-group">
+            <label for="signup-confirm-password">Confirm Password</label>
+            <input class="input" type="password" id="signup-confirm-password" name="confirmPassword" autocomplete="new-password" minlength="8" required>
+            <span class="error-text" id="password-mismatch-error" hidden>Passwords do not match.</span>
+          </div>
+
+          <button type="submit" class="btn-primary">Create Account</button>
+        </form>
+
+        <p class="auth-footer">
+          Already have an account? <a href="login.html">Log In</a>
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Include partials/footer.html here -->
+
+  <script>
+    // Front-end only validation hook: required fields + password match.
+    // TODO: replace with a real auth API call; only redirect on success
+    // and surface server-side errors (e.g. email already registered).
+    const form = document.getElementById('signup-form');
+    const password = document.getElementById('signup-password');
+    const confirmPassword = document.getElementById('signup-confirm-password');
+    const mismatchError = document.getElementById('password-mismatch-error');
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+
+      const passwordsMatch = password.value === confirmPassword.value;
+      mismatchError.hidden = passwordsMatch;
+
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
+      if (!passwordsMatch) {
+        confirmPassword.focus();
+        return;
+      }
+
+      console.log('Creating account for', form.fullName.value);
+    });
+  </script>
+
+</body>
+</html>
