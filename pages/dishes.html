@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>All Dishes | Baytna</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <!-- Reuses the search/chip-toolbar + empty-state classes built for the
+       Cooks/Stores pages (.cooks-toolbar, .area-filters, .cooks-empty) -->
+  <link rel="stylesheet" href="/css/pages.css">
+  <style>
+    /* Page-specific spacing: room above the heading (below the navbar)
+       and below the grid (above the footer), this page only. */
+    main.container {
+      padding-block: var(--space-6);
+    }
+  </style>
+</head>
+<body>
+  <!-- Shared navbar, loaded at runtime by js/include.js -->
+  <div data-include="/pages/partials/navbar.html"></div>
+
+  <main class="container">
+    <h1 style="margin-bottom: var(--space-2);">All Dishes</h1>
+    <p style="color: var(--text-muted); margin-bottom: var(--space-5);">
+      Browse homemade dishes from home stores across Oman.
+    </p>
+
+    <!-- Search + category filter -->
+    <div class="cooks-toolbar">
+      <label class="sr-only" for="dish-search">Search dishes</label>
+      <input class="input cooks-search" type="search" id="dish-search" placeholder="Search dishes by name...">
+
+      <div class="area-filters" role="group" aria-label="Filter dishes by category">
+        <button type="button" class="chip active" data-category="All">All</button>
+        <button type="button" class="chip" data-category="Mains">Mains</button>
+        <button type="button" class="chip" data-category="Sweets">Sweets</button>
+        <button type="button" class="chip" data-category="Bread">Bread</button>
+        <button type="button" class="chip" data-category="Drinks">Drinks</button>
+      </div>
+    </div>
+
+    <!-- Dish grid, rendered + filtered from sampleDishes by js/dishes.js -->
+    <div class="grid" id="dish-grid"></div>
+    <p class="cooks-empty" id="dish-empty" hidden>No dishes found. Try a different search or category.</p>
+  </main>
+
+  <!-- Shared footer, loaded at runtime by js/include.js -->
+  <div data-include="/pages/partials/footer.html"></div>
+
+  <script src="/js/sampleDishes.js"></script>
+  <script src="/js/dishCard.js"></script>
+  <script src="/js/include.js"></script>
+  <script src="/js/dishes.js"></script>
+</body>
+</html>
