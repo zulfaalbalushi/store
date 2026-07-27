@@ -7,10 +7,17 @@
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/components.css">
   <link rel="stylesheet" href="../css/pages.css">
+  <style>
+    /* Page-specific spacing: room above the breadcrumb (below the navbar)
+       and below the dish grid (above the footer), this page only. */
+    main.container {
+      padding-block: var(--space-6);
+    }
+  </style>
 </head>
 <body>
 
-  <!-- Include partials/navbar.html here -->
+  <div data-include="/pages/partials/navbar.html"></div>
 
   <main class="container">
 
@@ -81,42 +88,30 @@
     <!-- Dishes by this cook -->
     <section aria-labelledby="cook-dishes-heading">
       <h2 id="cook-dishes-heading" class="cook-dishes-title">Dishes by Mariam</h2>
-      <div class="grid">
-
-        <article class="card dish-card">
-          <img class="dish-card-image" src="../images/dishes/chicken-majboos.jpg" alt="Chicken Majboos">
-          <div class="dish-card-top-row">
-            <h3 class="dish-card-name">Chicken Majboos</h3>
-            <span class="dish-card-price">OMR 3.500</span>
-          </div>
-          <p class="dish-card-cook">4.8 ★ · 126 reviews</p>
-        </article>
-
-        <article class="card dish-card">
-          <img class="dish-card-image" src="../images/dishes/harees.jpg" alt="Harees">
-          <div class="dish-card-top-row">
-            <h3 class="dish-card-name">Harees</h3>
-            <span class="dish-card-price">OMR 2.800</span>
-          </div>
-          <p class="dish-card-cook">4.7 ★ · 64 reviews</p>
-        </article>
-
-        <article class="card dish-card">
-          <img class="dish-card-image" src="../images/dishes/cookies.jpg" alt="Homemade cookies">
-          <div class="dish-card-top-row">
-            <h3 class="dish-card-name">Cookies</h3>
-            <span class="dish-card-price">OMR 1.200</span>
-          </div>
-          <p class="dish-card-cook">4.9 ★ · 41 reviews</p>
-        </article>
-
-      </div>
+      <div class="grid" id="mariam-dishes-grid"></div>
     </section>
 
   </main>
 
-  <!-- Include partials/footer.html here -->
+  <div data-include="/pages/partials/footer.html"></div>
 
+  <script src="/js/include.js" defer></script>
+  <script src="../js/dishCard.js"></script>
+  <script>
+    // Dishes by this cook, rendered through the shared createDishCard()
+    // component (js/dishCard.js) so they match the dish cards used
+    // elsewhere on the site. Real photos/names/prices carried over from
+    // the previous hand-written markup.
+    (function () {
+      const mariamDishes = [
+        { id: 'chicken-majboos', name: 'Chicken Majboos', store: 'Mariam Al-Balushi', price: 3.500, image: '../images/dishes/chicken-majboos.jpg', category: 'Mains', isAvailable: true },
+        { id: 'harees', name: 'Harees', store: 'Mariam Al-Balushi', price: 2.800, image: '../images/dishes/harees.jpg', category: 'Mains', isAvailable: true },
+        { id: 'cookies', name: 'Cookies', store: 'Mariam Al-Balushi', price: 1.200, image: '../images/dishes/cookies.jpg', category: 'Sweets', isAvailable: true },
+      ];
+
+      document.getElementById('mariam-dishes-grid').innerHTML = mariamDishes.map(createDishCard).join('');
+    })();
+  </script>
   <script>
     // Logo upload preview.
     // Swaps the dashed placeholder for the chosen image, resized to fill

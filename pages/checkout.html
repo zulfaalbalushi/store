@@ -7,10 +7,17 @@
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/components.css">
   <link rel="stylesheet" href="../css/pages.css">
+  <style>
+    /* Page-specific spacing: room above the breadcrumb (below the navbar)
+       and below the checkout layout (above the footer), this page only. */
+    main.container {
+      padding-block: var(--space-6);
+    }
+  </style>
 </head>
 <body>
 
-  <!-- Include partials/navbar.html here -->
+  <div data-include="/pages/partials/navbar.html"></div>
 
   <main class="container">
 
@@ -107,8 +114,9 @@
 
   </main>
 
-  <!-- Include partials/footer.html here -->
+  <div data-include="/pages/partials/footer.html"></div>
 
+  <script src="/js/include.js" defer></script>
   <script>
     // Highlight the selected payment option (radio inputs don't get a
     // visual state of their own here — the wrapping label does).
