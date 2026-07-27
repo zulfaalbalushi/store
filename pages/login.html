@@ -10,7 +10,7 @@
 </head>
 <body>
 
-  <!-- Include partials/navbar.html here -->
+  <div data-include="/pages/partials/navbar.html"></div>
 
   <main class="container">
     <section class="auth-page">
@@ -41,8 +41,9 @@
     </section>
   </main>
 
-  <!-- Include partials/footer.html here -->
+  <div data-include="/pages/partials/footer.html"></div>
 
+  <script src="/js/include.js" defer></script>
   <script>
     // Front-end only validation hook.
     // TODO: replace with a real auth API call; only redirect on success

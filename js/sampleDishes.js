@@ -67,4 +67,14 @@ const sampleDishes = [
     category: 'Sweets',
     isAvailable: true,
   },
+  {
+    id: 7,
+    name: 'Chicken Majboos',
+    store: 'Mariam Al-Balushi',
+    price: 3.5,
+    image: '/images/dishes/chicken-majboos.jpg',
+    category: 'Mains',
+    isAvailable: true,
+    link: 'dish-detail.html',
+  },
 ];

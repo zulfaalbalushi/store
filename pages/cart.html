@@ -7,10 +7,17 @@
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/components.css">
   <link rel="stylesheet" href="../css/pages.css">
+  <style>
+    /* Page-specific spacing: room above the breadcrumb (below the navbar)
+       and below the cart layout (above the footer), this page only. */
+    main.container {
+      padding-block: var(--space-6);
+    }
+  </style>
 </head>
 <body>
 
-  <!-- Include partials/navbar.html here -->
+  <div data-include="/pages/partials/navbar.html"></div>
 
   <main class="container">
 
@@ -144,13 +151,14 @@
         Looks like you haven't added any homemade dishes yet. Explore what
         Omani home cooks near you are making today.
       </p>
-      <a href="cooks.html" class="btn-primary">Browse Dishes</a>
+      <a href="dishes.html" class="btn-primary">Browse Dishes</a>
     </section>
 
   </main>
 
-  <!-- Include partials/footer.html here -->
+  <div data-include="/pages/partials/footer.html"></div>
 
+  <script src="/js/include.js" defer></script>
   <script>
     // Cart quantity, remove, and totals logic.
     // Reads price/quantity straight from the DOM (data attributes) so this

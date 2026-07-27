@@ -324,10 +324,20 @@ textarea {
    <article class="card dish-card">. Markup is built by js/dishCard.js.
    -------------------------------------------------------------------------- */
 .dish-card {
+  position: relative;
   overflow: hidden;
   padding: 0;
   display: flex;
   flex-direction: column;
+}
+
+/* Makes the whole card clickable (dish.link) without nesting a <button>
+   inside an <a>: the overlay sits under the action button via z-index,
+   so "Add to cart" keeps working on its own. */
+.dish-card__link-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
 }
 
 .dish-card--unavailable {
@@ -379,12 +389,16 @@ textarea {
 }
 
 .dish-card__action {
+  position: relative;
+  z-index: 2;
   width: 100%;
   gap: var(--space-1);
   margin-top: var(--space-3);
 }
 
 .dish-card__sold-out {
+  position: relative;
+  z-index: 2;
   margin-top: var(--space-3);
   padding: var(--space-2);
   border-radius: var(--radius-sm);

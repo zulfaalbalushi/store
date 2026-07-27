@@ -7,10 +7,17 @@
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/components.css">
   <link rel="stylesheet" href="../css/pages.css">
+  <style>
+    /* Page-specific spacing: room above the breadcrumb (below the navbar)
+       and below the related-dishes grid (above the footer), this page only. */
+    main.container {
+      padding-block: var(--space-6);
+    }
+  </style>
 </head>
 <body>
 
-  <!-- Include partials/navbar.html here -->
+  <div data-include="/pages/partials/navbar.html"></div>
 
   <main class="container">
 
@@ -61,7 +68,7 @@
           <span class="chip" aria-disabled="true">Omani Classics</span>
           <p class="dish-cook-line">
             <span class="dish-cook-label">Cooked by</span>
-            <a class="dish-cook-name" href="cook-profile.html">Mariam Al-Balushi</a>
+            <a class="dish-cook-name" href="store-profile.html">Mariam Al-Balushi</a>
           </p>
         </div>
 
@@ -178,60 +185,32 @@
     <!-- Related dishes -->
     <section class="related-dishes" aria-labelledby="related-heading">
       <h2 id="related-heading" class="dish-section-title">You might also like</h2>
-      <div class="grid">
-
-        <article class="card dish-card">
-          <img class="dish-card-image" src="../images/dishes/shuwa.jpg" alt="Shuwa: slow-roasted spiced lamb wrapped in banana leaves">
-          <div class="dish-card-top-row">
-            <h3 class="dish-card-name">Shuwa</h3>
-            <span class="dish-card-price">OMR 6.250</span>
-          </div>
-          <p class="dish-card-cook">By Salim Al-Farsi</p>
-        </article>
-
-        <article class="card dish-card">
-          <img class="dish-card-image" src="../images/dishes/harees.jpg" alt="Harees: creamy wheat and meat porridge topped with ghee">
-          <div class="dish-card-top-row">
-            <h3 class="dish-card-name">Harees</h3>
-            <span class="dish-card-price">OMR 2.800</span>
-          </div>
-          <p class="dish-card-cook">By Mariam Al-Balushi</p>
-        </article>
-
-        <article class="card dish-card">
-          <img class="dish-card-image" src="../images/dishes/luqaimat.jpg" alt="Luqaimat: fried dumplings drizzled with date syrup">
-          <div class="dish-card-top-row">
-            <h3 class="dish-card-name">Luqaimat</h3>
-            <span class="dish-card-price">OMR 1.800</span>
-          </div>
-          <p class="dish-card-cook">By Aisha Al-Kindi</p>
-        </article>
-
-        <article class="card dish-card">
-          <img class="dish-card-image" src="../images/dishes/matcha.jpg" alt="Iced matcha drink in a glass cup">
-          <div class="dish-card-top-row">
-            <h3 class="dish-card-name">Matcha</h3>
-            <span class="dish-card-price">OMR 1.500</span>
-          </div>
-          <p class="dish-card-cook">By Salim Al-Farsi</p>
-        </article>
-
-        <article class="card dish-card">
-          <img class="dish-card-image" src="../images/dishes/cookies.jpg" alt="Freshly baked homemade cookies stacked on a plate">
-          <div class="dish-card-top-row">
-            <h3 class="dish-card-name">Cookies</h3>
-            <span class="dish-card-price">OMR 1.200</span>
-          </div>
-          <p class="dish-card-cook">By Aisha Al-Kindi</p>
-        </article>
-
-      </div>
+      <div class="grid" id="related-dishes-grid"></div>
     </section>
 
   </main>
 
-  <!-- Include partials/footer.html here -->
+  <div data-include="/pages/partials/footer.html"></div>
 
+  <script src="/js/include.js" defer></script>
+  <script src="../js/dishCard.js"></script>
+  <script>
+    // "You might also like" cards, rendered through the shared
+    // createDishCard() component (js/dishCard.js) so they match the dish
+    // cards used elsewhere on the site. Real photos/names/prices/stores
+    // carried over from the previous hand-written markup.
+    (function () {
+      const relatedDishes = [
+        { id: 'shuwa', name: 'Shuwa', store: 'Salim Al-Farsi', price: 6.250, image: '../images/dishes/shuwa.jpg', category: 'Mains', isAvailable: true },
+        { id: 'harees', name: 'Harees', store: 'Mariam Al-Balushi', price: 2.800, image: '../images/dishes/harees.jpg', category: 'Mains', isAvailable: true },
+        { id: 'luqaimat', name: 'Luqaimat', store: 'Aisha Al-Kindi', price: 1.800, image: '../images/dishes/luqaimat.jpg', category: 'Sweets', isAvailable: true },
+        { id: 'matcha', name: 'Matcha', store: 'Salim Al-Farsi', price: 1.500, image: '../images/dishes/matcha.jpg', category: 'Drinks', isAvailable: true },
+        { id: 'cookies', name: 'Cookies', store: 'Aisha Al-Kindi', price: 1.200, image: '../images/dishes/cookies.jpg', category: 'Sweets', isAvailable: true },
+      ];
+
+      document.getElementById('related-dishes-grid').innerHTML = relatedDishes.map(createDishCard).join('');
+    })();
+  </script>
   <script>
     // Quantity selector + Add to Cart price sync.
     // Keeps the button label in sync with unit price × quantity so the

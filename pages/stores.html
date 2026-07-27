@@ -7,10 +7,17 @@
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/components.css">
   <link rel="stylesheet" href="../css/pages.css">
+  <style>
+    /* Page-specific spacing: room above the breadcrumb (below the navbar)
+       and below the store grid (above the footer), this page only. */
+    main.container {
+      padding-block: var(--space-6);
+    }
+  </style>
 </head>
 <body>
 
-  <!-- Include partials/navbar.html here -->
+  <div data-include="/pages/partials/navbar.html"></div>
 
   <main class="container">
 
@@ -203,8 +210,9 @@
 
   </main>
 
-  <!-- Include partials/footer.html here -->
+  <div data-include="/pages/partials/footer.html"></div>
 
+  <script src="/js/include.js" defer></script>
   <script>
     // Client-side search + area-filter for the store grid.
     // Both filters combine (AND): a card must match the search text
