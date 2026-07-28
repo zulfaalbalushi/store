@@ -1,0 +1,30 @@
+Table users {
+  user_id int [pk]
+  name varchar
+  email varchar
+  password_hash varchar
+}
+
+Table listings {
+  listing_id int [pk]
+  listing_name varchar
+  category varchar
+  price decimal
+  image_url varchar
+  seller_id int [ref: > users.user_id]
+}
+
+Table orders {
+  order_id int [pk]
+  order_date date
+  status varchar
+  user_id int [ref: > users.user_id]
+}
+
+Table order_items {
+  order_item_id int [pk]
+  order_id int [ref: > orders.order_id]
+  listing_id int [ref: > listings.listing_id]
+  quantity int
+  price_at_purchase decimal
+}
