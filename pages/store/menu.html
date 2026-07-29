@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Manage your Baytna dishes and categories." />
+    <title>Menu — Baytna</title>
+    <script src="/js/theme.js"></script>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/components.css" />
+    <link rel="stylesheet" href="/css/store.css" />
+  </head>
+  <body class="store-body">
+    <div class="store-shell">
+      <aside class="store-sidebar" id="store-sidebar">
+        <a class="store-sidebar__brand" href="/pages/store/dashboard.html">Baytna Store</a>
+
+        <p class="store-sidebar__label">Workspace</p>
+        <nav class="store-nav" aria-label="Store navigation">
+          <a href="/pages/store/dashboard.html">Overview</a>
+          <a href="/pages/store/business.html">My business</a>
+          <a class="active" href="/pages/store/menu.html" aria-current="page">Menu</a>
+          <a href="/pages/store/orders.html">Orders</a>
+        </nav>
+
+        <p class="store-sidebar__label">Account</p>
+        <nav class="store-nav" aria-label="Store account navigation">
+          <a href="/pages/store/documents.html">Documents</a>
+          <a href="/pages/store/profile.html">Profile &amp; settings</a>
+        </nav>
+
+        <div class="store-sidebar__footer">
+          <p class="store-user-email" id="store-user-email">Store account</p>
+          <button class="store-signout" id="store-signout" type="button">Sign out</button>
+        </div>
+      </aside>
+
+      <main class="store-main">
+        <header class="store-header">
+          <button
+            class="store-menu-button"
+            id="store-menu-button"
+            type="button"
+            aria-controls="store-sidebar"
+            aria-expanded="false"
+          >
+            Menu
+          </button>
+          <p class="store-header__context">Store management</p>
+          <p class="store-status">Connected</p>
+        </header>
+
+        <div class="store-content">
+          <div class="store-heading">
+            <div>
+              <h1>Menu</h1>
+              <p>Create dishes, organize categories, and control what is available.</p>
+            </div>
+            <button class="btn-primary" id="add-dish-button" type="button">Add dish</button>
+          </div>
+
+          <div class="business-alert" id="menu-message" role="status" hidden></div>
+
+          <details class="category-manager">
+            <summary>
+              <span>
+                <strong>Categories</strong>
+                <small>Organize dishes into sections</small>
+              </span>
+              <span id="category-count">0 categories</span>
+            </summary>
+            <div class="category-manager__body">
+              <form class="category-create-form" id="category-form" novalidate>
+                <div class="business-field">
+                  <label for="new-category-name">New category</label>
+                  <input
+                    class="input"
+                    id="new-category-name"
+                    type="text"
+                    minlength="2"
+                    maxlength="80"
+                    placeholder="e.g. Main dishes"
+                    required
+                    aria-describedby="new-category-error"
+                  />
+                  <span class="error-text" id="new-category-error"></span>
+                </div>
+                <button class="btn-secondary" type="submit">Add category</button>
+              </form>
+              <div class="category-list" id="category-list">
+                <p class="menu-muted">Loading categories…</p>
+              </div>
+            </div>
+          </details>
+
+          <section class="menu-panel" aria-labelledby="dish-list-title">
+            <div class="menu-panel__header">
+              <div>
+                <h2 id="dish-list-title">Your dishes</h2>
+                <p id="dish-total">Loading menu…</p>
+              </div>
+            </div>
+
+            <form class="menu-filters" id="menu-filters">
+              <div class="business-field menu-filters__search">
+                <label for="dish-search">Search</label>
+                <input class="input" id="dish-search" type="search" placeholder="Search dishes" />
+              </div>
+              <div class="business-field">
+                <label for="category-filter">Category</label>
+                <select class="input" id="category-filter">
+                  <option value="">All categories</option>
+                </select>
+              </div>
+              <div class="business-field">
+                <label for="status-filter">Status</label>
+                <select class="input" id="status-filter">
+                  <option value="all">All current dishes</option>
+                  <option value="draft">Draft</option>
+                  <option value="active">Active</option>
+                  <option value="unavailable">Unavailable</option>
+                  <option value="archived">Archived</option>
+                </select>
+              </div>
+              <div class="business-field">
+                <label for="sort-filter">Sort</label>
+                <select class="input" id="sort-filter">
+                  <option value="updated_desc">Recently updated</option>
+                  <option value="name_asc">Name</option>
+                  <option value="price_asc">Price: low to high</option>
+                  <option value="price_desc">Price: high to low</option>
+                </select>
+              </div>
+              <button class="btn-secondary" type="submit">Apply</button>
+            </form>
+
+            <div class="menu-loading" id="menu-loading" role="status">Loading dishes…</div>
+            <div class="menu-empty" id="menu-empty" hidden>
+              <strong>No dishes found</strong>
+              <p id="menu-empty-copy">Add your first dish to start building the menu.</p>
+              <button class="btn-primary" id="empty-add-dish" type="button">Add dish</button>
+            </div>
+
+            <div class="dish-table-wrap" id="dish-table-wrap" hidden>
+              <table class="dish-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Dish</th>
+                    <th scope="col">Category</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Status</th>
+                    <th scope="col"><span class="visually-hidden">Actions</span></th>
+                  </tr>
+                </thead>
+                <tbody id="dish-table-body"></tbody>
+              </table>
+            </div>
+
+            <nav class="menu-pagination" id="menu-pagination" aria-label="Dish pages" hidden>
+              <button class="btn-secondary" id="previous-page" type="button">Previous</button>
+              <span id="page-summary">Page 1 of 1</span>
+              <button class="btn-secondary" id="next-page" type="button">Next</button>
+            </nav>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <dialog class="dish-dialog" id="dish-dialog" aria-labelledby="dish-dialog-title">
+      <form class="dish-form" id="dish-form" method="dialog" novalidate>
+        <div class="dish-dialog__header">
+          <div>
+            <p class="business-status-card__eyebrow">Menu item</p>
+            <h2 id="dish-dialog-title">Add dish</h2>
+          </div>
+          <button
+            class="dish-dialog__close"
+            id="close-dish-dialog"
+            type="button"
+            aria-label="Close"
+          >
+            &times;
+          </button>
+        </div>
+
+        <div class="business-alert business-alert--error" id="dish-form-message" hidden></div>
+
+        <div class="dish-form__grid">
+          <div class="business-field">
+            <label for="dish-name">Dish name</label>
+            <input
+              class="input"
+              id="dish-name"
+              type="text"
+              minlength="2"
+              maxlength="120"
+              required
+              aria-describedby="dish-name-error"
+            />
+            <span class="error-text" id="dish-name-error"></span>
+          </div>
+
+          <div class="business-field">
+            <label for="dish-category">Category</label>
+            <select class="input" id="dish-category" aria-describedby="dish-category-error">
+              <option value="">No category</option>
+            </select>
+            <span class="error-text" id="dish-category-error"></span>
+          </div>
+
+          <div class="business-field">
+            <label for="dish-price">Price (OMR)</label>
+            <input
+              class="input"
+              id="dish-price"
+              type="text"
+              inputmode="decimal"
+              placeholder="0.000"
+              required
+              aria-describedby="dish-price-help dish-price-error"
+            />
+            <span class="business-field__help" id="dish-price-help">
+              Use up to three decimal places.
+            </span>
+            <span class="error-text" id="dish-price-error"></span>
+          </div>
+
+          <div class="business-field">
+            <label for="dish-status">Status</label>
+            <select class="input" id="dish-status" aria-describedby="dish-status-error">
+              <option value="draft">Draft</option>
+              <option value="active">Active</option>
+              <option value="unavailable">Unavailable</option>
+            </select>
+            <span class="error-text" id="dish-status-error"></span>
+          </div>
+
+          <div class="business-field dish-form__full">
+            <label for="dish-description">Description</label>
+            <textarea
+              id="dish-description"
+              maxlength="1000"
+              placeholder="Ingredients, portion, and useful details"
+              aria-describedby="dish-description-error"
+            ></textarea>
+            <span class="error-text" id="dish-description-error"></span>
+          </div>
+        </div>
+
+        <div class="dish-dialog__actions">
+          <button class="btn-secondary" id="cancel-dish" type="button">Cancel</button>
+          <button class="btn-primary" id="save-dish" type="submit">Save dish</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/store.js"></script>
+    <script src="/js/menu.js"></script>
+  </body>
+</html>
