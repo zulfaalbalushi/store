@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Upload and review verification documents for your Baytna Store."
+    />
+    <title>Documents — Baytna</title>
+    <script src="/js/theme.js"></script>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/components.css" />
+    <link rel="stylesheet" href="/css/store.css" />
+  </head>
+  <body class="store-body">
+    <div class="store-shell">
+      <aside class="store-sidebar" id="store-sidebar">
+        <a class="store-sidebar__brand" href="/pages/store/dashboard.html">Baytna Store</a>
+
+        <p class="store-sidebar__label">Workspace</p>
+        <nav class="store-nav" aria-label="Store navigation">
+          <a href="/pages/store/dashboard.html">Overview</a>
+          <a href="/pages/store/business.html">My business</a>
+          <a href="/pages/store/menu.html">Menu</a>
+          <a href="/pages/store/orders.html">Orders</a>
+        </nav>
+
+        <p class="store-sidebar__label">Account</p>
+        <nav class="store-nav" aria-label="Store account navigation">
+          <a class="active" href="/pages/store/documents.html" aria-current="page">Documents</a>
+          <a href="/pages/store/profile.html">Profile &amp; settings</a>
+        </nav>
+
+        <div class="store-sidebar__footer">
+          <p class="store-user-email" id="store-user-email">Store account</p>
+          <button class="store-signout" id="store-signout" type="button">Sign out</button>
+        </div>
+      </aside>
+
+      <main class="store-main">
+        <header class="store-header">
+          <div class="store-header__actions">
+            <button
+              class="store-menu-button"
+              id="store-menu-button"
+              type="button"
+              aria-controls="store-sidebar"
+              aria-expanded="false"
+            >
+              Menu
+            </button>
+            <button class="theme-toggle" id="dark-mode-toggle" type="button" aria-pressed="false">
+              Dark mode: Off
+            </button>
+          </div>
+          <p class="store-header__context">Store management</p>
+          <p class="store-status">Connected</p>
+        </header>
+
+        <div class="store-content documents-content">
+          <div class="store-heading">
+            <div>
+              <h1>Verification documents</h1>
+              <p>Upload documents for your Store application and track their review status.</p>
+            </div>
+          </div>
+
+          <div
+            class="business-alert"
+            id="documents-message"
+            role="status"
+            aria-live="polite"
+            hidden
+          ></div>
+
+          <div class="documents-layout">
+            <form class="profile-card document-upload" id="document-form" novalidate>
+              <div>
+                <h2>Upload a document</h2>
+                <p>PDF, JPEG, or PNG. Maximum file size: 5 MB.</p>
+              </div>
+
+              <div class="business-field">
+                <label for="document-type">Document type</label>
+                <select
+                  class="input"
+                  id="document-type"
+                  required
+                  aria-describedby="document-type-error"
+                >
+                  <option value="">Select a document type</option>
+                  <option value="identity_document">Owner identity document</option>
+                  <option value="business_registration">Business registration</option>
+                  <option value="food_safety_certificate">Food safety certificate</option>
+                  <option value="other">Other supporting document</option>
+                </select>
+                <span class="error-text" id="document-type-error"></span>
+              </div>
+
+              <div class="business-field">
+                <label for="document-file">File</label>
+                <input
+                  class="input"
+                  id="document-file"
+                  type="file"
+                  accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+                  required
+                  aria-describedby="document-file-help document-file-error"
+                />
+                <span class="business-field__help" id="document-file-help">
+                  Upload only documents that belong to your business.
+                </span>
+                <span class="error-text" id="document-file-error"></span>
+              </div>
+
+              <div class="profile-card__actions">
+                <button class="btn-primary" id="upload-document" type="submit">
+                  Upload document
+                </button>
+              </div>
+            </form>
+
+            <section class="documents-list-card" aria-labelledby="uploaded-documents-title">
+              <div class="documents-list-card__heading">
+                <div>
+                  <h2 id="uploaded-documents-title">Uploaded documents</h2>
+                  <p>Only you and authorized platform reviewers can access these files.</p>
+                </div>
+                <span id="documents-total">0 documents</span>
+              </div>
+
+              <p class="documents-loading" id="documents-loading" role="status">
+                Loading documents…
+              </p>
+
+              <div class="empty-state" id="documents-empty" hidden>
+                <strong>No documents uploaded</strong>
+                <p>Your verification documents will appear here after you upload them.</p>
+              </div>
+
+              <ul class="documents-list" id="documents-list" aria-live="polite" hidden></ul>
+            </section>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/store.js"></script>
+    <script src="/js/documents.js"></script>
+  </body>
+</html>

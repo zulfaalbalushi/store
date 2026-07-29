@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Manage your Baytna home business." />
+    <title>Store dashboard — Baytna</title>
+    <script src="/js/theme.js"></script>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/components.css" />
+    <link rel="stylesheet" href="/css/store.css" />
+  </head>
+  <body class="store-body">
+    <div class="store-shell">
+      <aside class="store-sidebar" id="store-sidebar">
+        <a class="store-sidebar__brand" href="/pages/store/dashboard.html">Baytna Store</a>
+
+        <p class="store-sidebar__label">Workspace</p>
+        <nav class="store-nav" aria-label="Store navigation">
+          <a class="active" href="/pages/store/dashboard.html" aria-current="page">Overview</a>
+          <a href="/pages/store/business.html">My business</a>
+          <a href="/pages/store/menu.html">Menu</a>
+          <a href="/pages/store/orders.html">Orders</a>
+        </nav>
+
+        <p class="store-sidebar__label">Account</p>
+        <nav class="store-nav" aria-label="Store account navigation">
+          <a href="/pages/store/documents.html">Documents</a>
+          <a href="/pages/store/profile.html">Profile &amp; settings</a>
+        </nav>
+
+        <div class="store-sidebar__footer">
+          <p class="store-user-email" id="store-user-email">Store account</p>
+          <button class="store-signout" id="store-signout" type="button">Sign out</button>
+        </div>
+      </aside>
+
+      <main class="store-main">
+        <header class="store-header">
+          <button
+            class="store-menu-button"
+            id="store-menu-button"
+            type="button"
+            aria-controls="store-sidebar"
+            aria-expanded="false"
+          >
+            Menu
+          </button>
+          <p class="store-header__context">Store management</p>
+          <p class="store-status">Local preview</p>
+        </header>
+
+        <div class="store-content">
+          <div class="store-heading">
+            <div>
+              <h1>Overview</h1>
+              <p>Here is what is happening with your home business today.</p>
+            </div>
+          </div>
+
+          <section class="metric-grid" aria-label="Store metrics">
+            <article class="metric-card">
+              <p class="metric-card__label">Orders today</p>
+              <p class="metric-card__value">0</p>
+              <p class="metric-card__note">For your business</p>
+            </article>
+            <article class="metric-card">
+              <p class="metric-card__label">Active dishes</p>
+              <p class="metric-card__value">0</p>
+              <p class="metric-card__note">Currently available</p>
+            </article>
+            <article class="metric-card">
+              <p class="metric-card__label">Unavailable dishes</p>
+              <p class="metric-card__value">0</p>
+              <p class="metric-card__note">Currently hidden from customers</p>
+            </article>
+            <article class="metric-card">
+              <p class="metric-card__label">Revenue today</p>
+              <p class="metric-card__value">0.000</p>
+              <p class="metric-card__note">OMR before adjustments</p>
+            </article>
+          </section>
+
+          <section class="store-section" aria-labelledby="activity-title">
+            <div class="store-section__header">
+              <div>
+                <h2 id="activity-title">Recent orders</h2>
+                <p>Your latest customer orders will appear here.</p>
+              </div>
+            </div>
+            <div class="empty-state">
+              <strong>No orders yet</strong>
+              <p>New orders for your home business will appear here.</p>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/store.js"></script>
+  </body>
+</html>
