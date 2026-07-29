@@ -3,3 +3,11 @@ data/
 storage/uploads/
 AGENTS.md
 tasks.md
+
+# Customer-owned pages and shared customer components use the Customer team's formatting.
+index.html
+pages/*.html
+pages/partials/
+css/components.css
+css/home.css
+css/pages.css

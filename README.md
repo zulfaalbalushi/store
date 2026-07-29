@@ -1,7 +1,7 @@
 # Baytna
 
 Baytna is a marketplace for Omani home businesses and homemade food. This branch contains the
-standalone full-stack Store-owner portal and the shared Customer/Store authentication entry point.
+standalone full-stack Store-owner portal alongside the separately owned Customer experience.
 
 ## Stack
 
@@ -122,12 +122,13 @@ authenticated business before listing or downloading a document. The bucket must
 
 ## Authentication
 
-The authentication UI supports **Sign in** and **Create account** modes. Store registration and
-sign-in use Argon2id password hashes and server-managed, HTTP-only session cookies. Select
-**Store** to create an owner account and continue to the standalone owner dashboard.
+The Store authentication UI at `/pages/store/login.html` supports **Sign in** and **Create
+account** modes. Store registration and sign-in use Argon2id password hashes and server-managed,
+HTTP-only session cookies. Select **Store** to create an owner account and continue to the
+standalone owner dashboard.
 
-Customer access remains a development placeholder until the customer application and its
-server-side authentication are implemented.
+Customer authentication and customer-facing pages are maintained separately by the Customer
+application team.
 
 ## My Business
 

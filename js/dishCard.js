@@ -1,16 +1,22 @@
 /**
  * Builds the HTML for one dish card.
- * dish = { id, name, cook, price, image, category, isAvailable }
+ * dish = { id, name, store, price, image, category, isAvailable, link }
+ * `link`, if set, makes the whole card open that URL (e.g. dish-detail.html)
+ * while leaving "Add to cart" clickable on its own.
  *
  * Usage: loop over an array of dishes and join the results into a
  * container (e.g. an element with the .grid class):
  *   grid.innerHTML = dishes.map(createDishCard).join('');
  */
 function createDishCard(dish) {
-  const { id, name, cook, price, image, category, isAvailable } = dish;
+  const { id, name, store, price, image, category, isAvailable, link } = dish;
 
   const photo = image
     ? `<img class="dish-card__photo" src="${escapeHtml(image)}" alt="${escapeHtml(name)}">`
+    : '';
+
+  const linkOverlay = link
+    ? `<a class="dish-card__link-overlay" href="${escapeHtml(link)}" aria-label="View ${escapeHtml(name)}"></a>`
     : '';
 
   const priceLabel = `${Number(price).toFixed(3)} OMR`;
@@ -28,13 +34,14 @@ function createDishCard(dish) {
 
   return `
     <article class="card dish-card${isAvailable ? '' : ' dish-card--unavailable'}" data-dish-id="${escapeHtml(String(id))}" data-category="${escapeHtml(String(category))}">
+      ${linkOverlay}
       <div class="dish-card__photo-wrap">
         ${photo}
         <span class="badge dish-card__badge">Homemade</span>
       </div>
       <div class="dish-card__body">
         <p class="dish-card__name">${escapeHtml(name)}</p>
-        <p class="dish-card__cook">by ${escapeHtml(cook)}</p>
+        <p class="dish-card__store">from ${escapeHtml(store)}</p>
         <p class="dish-card__price">${priceLabel}</p>
         ${action}
       </div>
@@ -42,7 +49,7 @@ function createDishCard(dish) {
   `;
 }
 
-/** Escapes text pulled from dish data before it's dropped into HTML (dish/cook names come from home cooks, so treat them as untrusted input). */
+/** Escapes text pulled from dish data before it's dropped into HTML (dish/store names come from home stores, so treat them as untrusted input). */
 function escapeHtml(value) {
   return String(value)
     .replace(/&/g, '&amp;')

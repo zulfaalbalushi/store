@@ -9,7 +9,7 @@
     email.textContent = session.account.email;
   } catch {
     window.BaytnaApi.clearSession();
-    window.location.replace('/');
+    window.location.replace('/pages/store/login.html');
     return;
   }
 
@@ -22,7 +22,7 @@
       });
     } finally {
       window.BaytnaApi.clearSession();
-      window.location.replace('/');
+      window.location.replace('/pages/store/login.html');
     }
   });
 

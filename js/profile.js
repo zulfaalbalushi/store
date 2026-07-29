@@ -58,7 +58,7 @@
       email.value = data.account.email;
     } catch (error) {
       if (error.status === 401) {
-        window.location.replace('/');
+        window.location.replace('/pages/store/login.html');
         return;
       }
       showMessage(error.message, 'error');

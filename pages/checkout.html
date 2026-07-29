@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout | Baytna</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/pages.css">
+  <style>
+    /* Page-specific spacing: room above the breadcrumb (below the navbar)
+       and below the checkout layout (above the footer), this page only. */
+    main.container {
+      padding-block: var(--space-6);
+    }
+  </style>
+</head>
+<body>
+
+  <div data-include="/pages/partials/navbar.html"></div>
+
+  <main class="container">
+
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="breadcrumb-sep">/</span>
+      <a href="cart.html">Cart</a>
+      <span class="breadcrumb-sep">/</span>
+      <span class="breadcrumb-current" aria-current="page">Checkout</span>
+    </nav>
+
+    <h1 style="margin-bottom: var(--space-4);">Checkout</h1>
+
+    <form class="checkout-layout" id="checkout-form" novalidate>
+
+      <!-- LEFT: delivery details -->
+      <section class="checkout-form">
+        <h2 class="checkout-section-title">Delivery Details</h2>
+
+        <div class="form-group">
+          <label for="full-name">Full Name</label>
+          <input class="input" type="text" id="full-name" name="full-name" autocomplete="name" required>
+        </div>
+
+        <div class="form-group">
+          <label for="phone">Phone Number</label>
+          <input class="input" type="tel" id="phone" name="phone" autocomplete="tel" placeholder="+968 9XXX XXXX" required>
+        </div>
+
+        <div class="form-group">
+          <label for="address">Delivery Address</label>
+          <input class="input" type="text" id="address" name="address" autocomplete="street-address" placeholder="Building, street, area, Muscat" required>
+        </div>
+
+        <div class="form-group">
+          <label for="notes">Notes (optional)</label>
+          <textarea id="notes" name="notes" placeholder="e.g. Leave with the security guard, extra spicy, no onions..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label id="payment-method-label">Payment Method</label>
+          <div class="payment-methods" role="radiogroup" aria-labelledby="payment-method-label">
+            <label class="payment-option is-selected">
+              <input type="radio" name="payment-method" value="cash" checked>
+              <span class="payment-option-label">Cash on Delivery</span>
+            </label>
+            <label class="payment-option">
+              <input type="radio" name="payment-method" value="card">
+              <span class="payment-option-label">Card</span>
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT: order summary -->
+      <aside class="order-summary" aria-labelledby="checkout-summary-title">
+        <h2 id="checkout-summary-title" class="order-summary-title">Order Summary</h2>
+
+        <div class="checkout-summary-items">
+          <div class="checkout-summary-item">
+            <span><span class="checkout-summary-item-qty">2×</span> Chicken Majboos</span>
+            <span>OMR 7.000</span>
+          </div>
+          <div class="checkout-summary-item">
+            <span><span class="checkout-summary-item-qty">1×</span> Shuwa</span>
+            <span>OMR 6.250</span>
+          </div>
+          <div class="checkout-summary-item">
+            <span><span class="checkout-summary-item-qty">1×</span> Luqaimat</span>
+            <span>OMR 1.800</span>
+          </div>
+        </div>
+
+        <div class="order-summary-row is-muted">
+          <span>Subtotal</span>
+          <span>OMR 15.050</span>
+        </div>
+        <div class="order-summary-row is-muted">
+          <span>Delivery Fee</span>
+          <span>OMR 1.000</span>
+        </div>
+
+        <hr class="order-summary-divider">
+
+        <div class="order-summary-row order-summary-total">
+          <span>Total</span>
+          <span>OMR 16.050</span>
+        </div>
+
+        <button type="submit" class="btn-primary">Confirm Order</button>
+      </aside>
+
+    </form>
+
+  </main>
+
+  <div data-include="/pages/partials/footer.html"></div>
+
+  <script src="/js/include.js" defer></script>
+  <script>
+    // Highlight the selected payment option (radio inputs don't get a
+    // visual state of their own here — the wrapping label does).
+    (function () {
+      const paymentOptions = document.querySelectorAll('.payment-option');
+
+      paymentOptions.forEach((option) => {
+        option.addEventListener('click', () => {
+          paymentOptions.forEach((el) => el.classList.remove('is-selected'));
+          option.classList.add('is-selected');
+        });
+      });
+
+      // On submit, go to the confirmation page.
+      // TODO: replace with a real order-creation API call; only navigate
+      // once that call succeeds.
+      const form = document.getElementById('checkout-form');
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        if (form.checkValidity()) {
+          window.location.href = 'order-confirmation.html';
+        } else {
+          form.reportValidity();
+        }
+      });
+    })();
+  </script>
+
+</body>
+</html>

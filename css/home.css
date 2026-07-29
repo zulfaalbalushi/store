@@ -1,0 +1,133 @@
+/* ==========================================================================
+   Baytna — Home page
+   Page-specific sections that only appear on index.html (hero, category
+   row, "Popular this week"). Reusable pieces (buttons, chips, cards,
+   grid) live in components.css / style.css — this file only adds the
+   layout wrapping them. Depends on the tokens in style.css, so load
+   style.css and components.css first.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Hero
+   Two-column layout: copy + CTA on one side, photo placeholder on the
+   other. Sits on a --surface-alt band so it stands out from the page
+   background (--bg).
+   -------------------------------------------------------------------------- */
+.hero {
+  background-color: var(--surface-alt);
+  padding-block: var(--space-6);
+}
+
+.hero__inner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+}
+
+.hero__content {
+  flex: 1 1 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.hero__content p {
+  color: var(--text-muted);
+  font-size: 1.0625rem;
+}
+
+.hero__media {
+  flex: 1 1 420px;
+}
+
+/* Stand-in for a real food photo. Same fill as the hero band itself —
+   the border + shadow (reused from .card) are what give it edges until
+   photography is ready to drop in as an <img>. */
+.hero__photo-placeholder {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background-color: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+}
+
+/* --------------------------------------------------------------------------
+   Category row
+   Row of .chip pills (see components.css). Purely visual here — no
+   filtering logic yet, that lives on the Dishes page.
+   -------------------------------------------------------------------------- */
+.category-row {
+  padding-block: var(--space-4);
+}
+
+.category-row__inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+/* --------------------------------------------------------------------------
+   Popular this week
+   Heading + the shared .grid of dish cards.
+   -------------------------------------------------------------------------- */
+.popular {
+  padding-block: var(--space-6);
+}
+
+.popular h2 {
+  margin-bottom: var(--space-4);
+}
+
+/* --------------------------------------------------------------------------
+   Responsive breakpoints
+   Same steps as style.css: 1024px, 768px, 480px.
+   -------------------------------------------------------------------------- */
+@media (max-width: 1024px) {
+  .hero__inner {
+    gap: var(--space-5);
+  }
+}
+
+@media (max-width: 768px) {
+  /* Stack hero: text above image.
+     Reset flex-basis to auto — otherwise the 420px basis from the
+     row layout gets reapplied to *height* once the axis flips to
+     column, leaving a tall empty gap under short content. */
+  .hero__inner {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hero__content,
+  .hero__media {
+    flex: 1 1 auto;
+  }
+
+  .hero {
+    padding-block: var(--space-5);
+  }
+
+  .popular {
+    padding-block: var(--space-5);
+  }
+}
+
+@media (max-width: 480px) {
+  .hero {
+    padding-block: var(--space-4);
+  }
+
+  .hero__content {
+    gap: var(--space-2);
+  }
+
+  .category-row__inner {
+    gap: var(--space-1);
+  }
+
+  .popular {
+    padding-block: var(--space-4);
+  }
+}

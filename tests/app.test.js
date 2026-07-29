@@ -87,13 +87,17 @@ test('health endpoint rejects unsupported methods', async () => {
   assert.equal(payload.error.code, 'METHOD_NOT_ALLOWED');
 });
 
-test('server safely serves the authentication page', async () => {
+test('server safely serves the customer homepage and Store authentication page', async () => {
   const handler = createRequestHandler({ logger: silentLogger });
-  const response = await request(handler, '/');
+  const homepageResponse = await request(handler, '/');
+  const authenticationResponse = await request(handler, '/pages/store/login.html');
 
-  assert.equal(response.status, 200);
-  assert.match(response.headers['Content-Type'], /^text\/html/);
-  assert.match(response.body, /Create account/);
+  assert.equal(homepageResponse.status, 200);
+  assert.match(homepageResponse.headers['Content-Type'], /^text\/html/);
+  assert.match(homepageResponse.body, /Taste the love/);
+  assert.equal(authenticationResponse.status, 200);
+  assert.match(authenticationResponse.headers['Content-Type'], /^text\/html/);
+  assert.match(authenticationResponse.body, /Create account/);
 });
 
 test('server serves the Store-owner portal and removes the old admin route', async () => {
