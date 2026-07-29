@@ -41,13 +41,11 @@
   flex: 1 1 420px;
 }
 
-/* Stand-in for a real food photo. Same fill as the hero band itself —
-   the border + shadow (reused from .card) are what give it edges until
-   photography is ready to drop in as an <img>. */
-.hero__photo-placeholder {
+.hero__photo {
+  display: block;
   width: 100%;
   aspect-ratio: 4 / 3;
-  background-color: var(--surface-alt);
+  object-fit: cover;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-soft);

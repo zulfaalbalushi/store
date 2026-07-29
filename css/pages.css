@@ -1203,3 +1203,111 @@
   width: 13px;
   height: 13px;
 }
+
+/* ==========================================================================
+   About page
+   Simple, story-driven layout: an intro band (same --surface-alt
+   treatment as the homepage hero, just text-only), a narrow story
+   column, a row of value cards, and a centered closing tagline.
+   No new colors or components — everything below reuses tokens from
+   style.css and the .card/.grid/.ar classes already in use elsewhere.
+   ========================================================================== */
+
+/* Intro band */
+.about-intro {
+  background-color: var(--surface-alt);
+  padding-block: var(--space-6);
+  text-align: center;
+}
+
+.about-intro__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.about-intro__inner p {
+  color: var(--text-muted);
+  font-size: 1.0625rem;
+  max-width: 48ch;
+}
+
+/* Our Story: narrow centered column keeps long-form copy readable */
+.about-story {
+  padding-block: var(--space-6);
+}
+
+.about-story__inner {
+  max-width: 65ch;
+  margin-inline: auto;
+}
+
+.about-story__inner h2 {
+  margin-bottom: var(--space-3);
+}
+
+.about-story__inner p + p {
+  margin-top: var(--space-3);
+}
+
+/* What We Believe: three value cards in a row, reuses .card */
+.about-values-section {
+  padding-block: var(--space-6);
+}
+
+.about-values-section h2 {
+  text-align: center;
+  margin-bottom: var(--space-4);
+}
+
+.about-values {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-4);
+}
+
+.about-value-card h3 {
+  margin-bottom: var(--space-2);
+}
+
+.about-value-card p {
+  color: var(--text-muted);
+}
+
+/* Closing tagline. .ar (style.css) sets direction: rtl + right alignment
+   for Arabic script; override alignment here so the line stays centered
+   inside this already-centered section. */
+.about-closing {
+  padding-block: var(--space-6);
+  text-align: center;
+}
+
+.about-closing .ar {
+  font-size: 1.375rem;
+  text-align: center;
+}
+
+.about-closing p + p {
+  color: var(--text-muted);
+  margin-top: var(--space-2);
+}
+
+@media (max-width: 768px) {
+  .about-values {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .about-intro,
+  .about-story,
+  .about-values-section,
+  .about-closing {
+    padding-block: var(--space-5);
+  }
+
+  .about-values {
+    grid-template-columns: 1fr;
+  }
+}

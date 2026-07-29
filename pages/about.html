@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About | Baytna</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <!-- Page-specific rules (intro band, story column, value cards,
+       closing tagline) live in the "About page" section of pages.css -->
+  <link rel="stylesheet" href="../css/pages.css">
+</head>
+<body>
+
+  <!-- Shared navbar, loaded at runtime by js/include.js -->
+  <div data-include="/pages/partials/navbar.html"></div>
+
+  <main>
+
+    <!-- 1. Intro band: same --surface-alt band treatment as the homepage
+         hero, but text-only and centered -->
+    <section class="about-intro">
+      <div class="container about-intro__inner">
+        <h1>About Baytna</h1>
+        <p>Homemade Omani food, made with love — from our home to yours.</p>
+      </div>
+    </section>
+
+    <!-- 2. Our Story: narrow centered column for easy reading.
+         Placeholder copy below — replace with Baytna's real story. -->
+    <section class="about-story">
+      <div class="container about-story__inner">
+        <h2>Our Story</h2>
+        <!-- REPLACE ME: paragraph 1 — how/why Baytna started -->
+        <p>
+          Baytna started with a simple idea: the best meals come from home
+          kitchens, not commercial ones.
+        </p>
+        <!-- REPLACE ME: paragraph 2 — what Baytna has grown into -->
+        <p>
+          What began as a small effort to share home-cooked Omani food has
+          grown into a place where local home cooks and the people who love
+          their food can find each other. 
+        </p>
+      </div>
+    </section>
+
+    <!-- 3. What we believe: three value cards, reusing .card -->
+    <section class="about-values-section">
+      <div class="container">
+        <h2>What We Believe</h2>
+        <div class="grid about-values">
+
+          <article class="card about-value-card">
+            <h3>Support Local</h3>
+            <p>Helping small Omani home businesses grow, one order at a time.</p>
+          </article>
+
+          <article class="card about-value-card">
+            <h3>Real &amp; Authentic</h3>
+            <p>Honest homemade food, cooked the traditional way — no shortcuts.</p>
+          </article>
+
+          <article class="card about-value-card">
+            <h3>Warmth of Home</h3>
+            <p>The feeling of a home-cooked meal, made to be shared with everyone.</p>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Closing tagline: Arabic line uses the shared .ar utility
+         (style.css) so it renders right-to-left, English line softly below -->
+    <section class="about-closing">
+      <div class="container">
+        <p class="ar">من بيتنا لبيتكم</p>
+        <p>From our home to yours.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Shared footer, loaded at runtime by js/include.js -->
+  <div data-include="/pages/partials/footer.html"></div>
+
+  <script src="/js/include.js" defer></script>
+</body>
+</html>
