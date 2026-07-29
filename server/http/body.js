@@ -28,3 +28,29 @@ export async function readJsonBody(request, maximumBytes = DEFAULT_MAXIMUM_BYTES
     throw new HttpError(400, 'INVALID_JSON', 'The request body must contain valid JSON.');
   }
 }
+
+export async function readBinaryBody(request, maximumBytes) {
+  const contentLength = Number(request.headers['content-length']);
+  if (Number.isFinite(contentLength) && contentLength > maximumBytes) {
+    throw new HttpError(413, 'PAYLOAD_TOO_LARGE', 'The uploaded file is too large.');
+  }
+
+  const chunks = [];
+  let receivedBytes = 0;
+
+  for await (const chunk of request) {
+    receivedBytes += chunk.length;
+    if (receivedBytes > maximumBytes) {
+      throw new HttpError(413, 'PAYLOAD_TOO_LARGE', 'The uploaded file is too large.');
+    }
+    chunks.push(chunk);
+  }
+
+  if (receivedBytes === 0) {
+    throw new HttpError(422, 'VALIDATION_ERROR', 'Choose a file to upload.', {
+      file: 'Choose a file to upload.',
+    });
+  }
+
+  return Buffer.concat(chunks);
+}

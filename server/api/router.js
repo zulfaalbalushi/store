@@ -9,7 +9,13 @@ import {
   sessionCookie,
 } from '../auth/session.js';
 import { getOwnedBusiness, submitOwnedBusiness, updateOwnedBusiness } from '../business/service.js';
-import { readJsonBody } from '../http/body.js';
+import {
+  downloadOwnedDocument,
+  listOwnedDocuments,
+  MAXIMUM_DOCUMENT_BYTES,
+  uploadOwnedDocument,
+} from '../documents/service.js';
+import { readBinaryBody, readJsonBody } from '../http/body.js';
 import { methodNotAllowed } from '../http/errors.js';
 import { sendSuccess } from '../http/responses.js';
 import {
@@ -37,7 +43,12 @@ function accountPayload(result) {
   };
 }
 
-export function createApiRouter({ config, database }) {
+function downloadFilenameHeader(filename) {
+  const fallback = filename.replaceAll(/[^\w.-]/g, '_') || 'document';
+  return `attachment; filename="${fallback}"; filename*=UTF-8''${encodeURIComponent(filename)}`;
+}
+
+export function createApiRouter({ config, database, documentStorage = null }) {
   const isProduction = config.environment === 'production';
   const authenticationRateLimiter = createRateLimiter();
 
@@ -147,6 +158,54 @@ export function createApiRouter({ config, database }) {
       const session = await requireStoreSession(database, request, config.sessionSecret);
       requireCsrf(request, session);
       sendSuccess(response, { business: await submitOwnedBusiness(database, session) });
+      return true;
+    }
+
+    if (requestUrl.pathname === '/api/v1/store/documents') {
+      const session = await requireStoreSession(database, request, config.sessionSecret);
+
+      if (request.method === 'GET') {
+        sendSuccess(response, { documents: await listOwnedDocuments(database, session) });
+        return true;
+      }
+
+      if (request.method === 'POST') {
+        requireCsrf(request, session);
+        const contents = await readBinaryBody(request, MAXIMUM_DOCUMENT_BYTES);
+        const document = await uploadOwnedDocument(database, documentStorage, session, {
+          contents,
+          documentType: request.headers['x-document-type'],
+          mimeType: request.headers['content-type'],
+          originalName: request.headers['x-file-name'],
+        });
+        sendSuccess(response, { document }, 201);
+        return true;
+      }
+
+      throw methodNotAllowed();
+    }
+
+    const documentContentMatch = requestUrl.pathname.match(
+      /^\/api\/v1\/store\/documents\/(\d+)\/content$/,
+    );
+    if (documentContentMatch) {
+      requireMethod(request, 'GET');
+      const session = await requireStoreSession(database, request, config.sessionSecret);
+      const document = await downloadOwnedDocument(
+        database,
+        documentStorage,
+        session,
+        documentContentMatch[1],
+      );
+
+      response.writeHead(200, {
+        'Cache-Control': 'private, no-store',
+        'Content-Disposition': downloadFilenameHeader(document.originalName),
+        'Content-Length': document.contents.length,
+        'Content-Type': document.mimeType,
+        'X-Content-Type-Options': 'nosniff',
+      });
+      response.end(document.contents);
       return true;
     }
 

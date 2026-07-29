@@ -19,6 +19,10 @@ export function loadConfig(environment = process.env) {
   const databaseUrl = environment.BAYTNA_DATABASE_URL;
   const databaseCaPath = environment.BAYTNA_DATABASE_CA_PATH;
   const sessionSecret = environment.BAYTNA_SESSION_SECRET;
+  const supabaseUrl = environment.BAYTNA_SUPABASE_URL;
+  const supabaseSecretKey =
+    environment.BAYTNA_SUPABASE_SECRET_KEY || environment.BAYTNA_SUPABASE_SERVICE_ROLE_KEY;
+  const supabaseDocumentsBucket = environment.BAYTNA_SUPABASE_DOCUMENTS_BUCKET;
 
   if (!ALLOWED_ENVIRONMENTS.has(nodeEnvironment)) {
     errors.push('NODE_ENV must be development, test, or production.');
@@ -51,6 +55,37 @@ export function loadConfig(environment = process.env) {
     errors.push('BAYTNA_SESSION_SECRET must contain at least 32 characters.');
   }
 
+  if (environment.BAYTNA_SUPABASE_SECRET_KEY && environment.BAYTNA_SUPABASE_SERVICE_ROLE_KEY) {
+    errors.push('Set only one of BAYTNA_SUPABASE_SECRET_KEY or BAYTNA_SUPABASE_SERVICE_ROLE_KEY.');
+  }
+
+  const storageValues = [supabaseUrl, supabaseSecretKey, supabaseDocumentsBucket];
+  const configuredStorageValues = storageValues.filter(Boolean).length;
+
+  if (configuredStorageValues > 0 && configuredStorageValues < storageValues.length) {
+    errors.push(
+      'Set BAYTNA_SUPABASE_URL, a Supabase server key, and BAYTNA_SUPABASE_DOCUMENTS_BUCKET together.',
+    );
+  }
+
+  if (supabaseUrl) {
+    try {
+      const parsedSupabaseUrl = new URL(supabaseUrl);
+      if (parsedSupabaseUrl.protocol !== 'https:') {
+        errors.push('BAYTNA_SUPABASE_URL must use HTTPS.');
+      }
+    } catch {
+      errors.push('BAYTNA_SUPABASE_URL must be a valid URL.');
+    }
+  }
+
+  if (
+    supabaseDocumentsBucket &&
+    !/^[a-z0-9][a-z0-9._-]{1,98}[a-z0-9]$/i.test(supabaseDocumentsBucket)
+  ) {
+    errors.push('BAYTNA_SUPABASE_DOCUMENTS_BUCKET must be a valid bucket name.');
+  }
+
   if (errors.length > 0) {
     throw new ConfigurationError(errors);
   }
@@ -64,5 +99,8 @@ export function loadConfig(environment = process.env) {
     databaseUrl: databaseUrl || null,
     databaseType: databaseUrl ? 'postgresql' : 'sqlite',
     sessionSecret,
+    supabaseDocumentsBucket: supabaseDocumentsBucket || null,
+    supabaseSecretKey: supabaseSecretKey || null,
+    supabaseUrl: supabaseUrl ? supabaseUrl.replace(/\/+$/, '') : null,
   });
 }

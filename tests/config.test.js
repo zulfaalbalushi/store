@@ -35,6 +35,34 @@ test('loadConfig accepts a PostgreSQL connection URL instead of a SQLite path', 
   assert.match(config.databaseCaPath, /certificates[/\\]supabase-ca\.crt$/);
 });
 
+test('loadConfig accepts a complete Supabase Storage configuration', () => {
+  const config = loadConfig({
+    ...VALID_ENVIRONMENT,
+    BAYTNA_SUPABASE_URL: 'https://project-ref.supabase.co/',
+    BAYTNA_SUPABASE_SECRET_KEY: 'sb_secret_server-only-key',
+    BAYTNA_SUPABASE_DOCUMENTS_BUCKET: 'store-documents',
+  });
+
+  assert.equal(config.supabaseUrl, 'https://project-ref.supabase.co');
+  assert.equal(config.supabaseSecretKey, 'sb_secret_server-only-key');
+  assert.equal(config.supabaseDocumentsBucket, 'store-documents');
+});
+
+test('loadConfig rejects incomplete Supabase Storage configuration', () => {
+  assert.throws(
+    () =>
+      loadConfig({
+        ...VALID_ENVIRONMENT,
+        BAYTNA_SUPABASE_URL: 'https://project-ref.supabase.co',
+      }),
+    (error) =>
+      error instanceof ConfigurationError &&
+      error.messages.includes(
+        'Set BAYTNA_SUPABASE_URL, a Supabase server key, and BAYTNA_SUPABASE_DOCUMENTS_BUCKET together.',
+      ),
+  );
+});
+
 test('loadConfig rejects ambiguous or non-PostgreSQL database configuration', () => {
   assert.throws(
     () =>

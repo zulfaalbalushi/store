@@ -99,6 +99,27 @@ Connecting the Store portal to customer-owned tables or translating customer ord
 Store-fulfillment orders is a separate integration and is intentionally not performed by this
 migration.
 
+## Supabase document storage
+
+The **Documents** page stores verification-file metadata in the existing
+`store_portal.business_documents` table and file contents in a private Supabase Storage bucket in
+the same project. The application does not create a project, database, or bucket automatically.
+
+In the existing Supabase project, use an existing private bucket or coordinate with the project
+owner to create one. Configure the server with:
+
+```sh
+BAYTNA_SUPABASE_URL=https://PROJECT_REF.supabase.co
+BAYTNA_SUPABASE_SECRET_KEY=sb_secret_...
+BAYTNA_SUPABASE_DOCUMENTS_BUCKET=store-documents
+```
+
+The secret key must remain server-only and must never be placed in browser JavaScript or committed.
+A legacy JWT service-role key can instead be supplied as `BAYTNA_SUPABASE_SERVICE_ROLE_KEY` during
+key migration. Set only one server key. The server accepts PDF, JPEG, and PNG documents up to 5 MB,
+checks their file signatures, generates owner-prefixed random storage keys, and checks the
+authenticated business before listing or downloading a document. The bucket must remain private.
+
 ## Authentication
 
 The authentication UI supports **Sign in** and **Create account** modes. Store registration and
@@ -198,16 +219,22 @@ npm run format
 
 ## Environment variables
 
-| Variable                        | Required | Description                                                           |
-| ------------------------------- | -------- | --------------------------------------------------------------------- |
-| `NODE_ENV`                      | No       | `development`, `test`, or `production`                                |
-| `HOST`                          | No       | Address to bind; defaults to `127.0.0.1`                              |
-| `PORT`                          | No       | HTTP port; defaults to `8000`                                         |
-| `BAYTNA_DATABASE_PATH`          | Choice   | SQLite path; mutually exclusive with database URL                     |
-| `BAYTNA_DATABASE_URL`           | Choice   | Server-only PostgreSQL URL; mutually exclusive with SQLite path       |
-| `BAYTNA_DATABASE_CA_PATH`       | No       | Local CA certificate used for strict PostgreSQL TLS verification      |
-| `BAYTNA_MIGRATION_DATABASE_URL` | No       | Optional privileged URL used only by the PostgreSQL migration command |
-| `BAYTNA_SESSION_SECRET`         | Yes      | Private value containing at least 32 characters                       |
+| Variable                           | Required | Description                                                           |
+| ---------------------------------- | -------- | --------------------------------------------------------------------- |
+| `NODE_ENV`                         | No       | `development`, `test`, or `production`                                |
+| `HOST`                             | No       | Address to bind; defaults to `127.0.0.1`                              |
+| `PORT`                             | No       | HTTP port; defaults to `8000`                                         |
+| `BAYTNA_DATABASE_PATH`             | Choice   | SQLite path; mutually exclusive with database URL                     |
+| `BAYTNA_DATABASE_URL`              | Choice   | Server-only PostgreSQL URL; mutually exclusive with SQLite path       |
+| `BAYTNA_DATABASE_CA_PATH`          | No       | Local CA certificate used for strict PostgreSQL TLS verification      |
+| `BAYTNA_MIGRATION_DATABASE_URL`    | No       | Optional privileged URL used only by the PostgreSQL migration command |
+| `BAYTNA_SUPABASE_URL`              | Group    | Existing Supabase project URL used by private document storage        |
+| `BAYTNA_SUPABASE_SECRET_KEY`       | Group    | Preferred server-only key used by the document storage adapter        |
+| `BAYTNA_SUPABASE_SERVICE_ROLE_KEY` | Group    | Legacy alternative to the Supabase secret key                         |
+| `BAYTNA_SUPABASE_DOCUMENTS_BUCKET` | Group    | Existing private bucket for Store verification documents              |
+| `BAYTNA_SESSION_SECRET`            | Yes      | Private value containing at least 32 characters                       |
 
 Exactly one runtime database setting is required. The server validates configuration before
-binding to the port and refuses to start when required values are missing or unsafe.
+binding to the port and refuses to start when required values are missing or unsafe. Supabase
+Storage variables are optional as a group, but the Documents API reports unavailable until all
+three are configured.

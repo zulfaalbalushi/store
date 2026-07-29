@@ -45,6 +45,35 @@
     return payload.data;
   }
 
+  async function upload(path, file, headers = {}) {
+    const response = await fetch(path, {
+      method: 'POST',
+      body: file,
+      credentials: 'same-origin',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': file.type,
+        ...headers,
+      },
+    });
+
+    let payload;
+    try {
+      payload = await response.json();
+    } catch {
+      throw new ApiError(response.status, {
+        code: 'INVALID_RESPONSE',
+        message: 'The server returned an invalid response.',
+      });
+    }
+
+    if (!response.ok || payload.success !== true) {
+      throw new ApiError(response.status, payload.error);
+    }
+
+    return payload.data;
+  }
+
   function csrfHeaders() {
     const csrfToken = sessionStorage.getItem('baytnaCsrfToken');
     return csrfToken ? { 'X-CSRF-Token': csrfToken } : {};
@@ -81,5 +110,6 @@
     getSession,
     request,
     saveSession,
+    upload,
   };
 })();

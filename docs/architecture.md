@@ -58,16 +58,28 @@ server/
   business/           Ownership-scoped My Business domain service
   config.js          Environment validation
   database/           SQLite/PostgreSQL connections, migrations, and schemas
+  documents/          Owner-scoped document validation and metadata
+  storage/            Private Supabase Storage adapter
   index.js           Process entry point
   app.js             HTTP request handler
   http/              HTTP errors and JSON response helpers
   static.js          Safe static-file serving
-storage/uploads/     Local development uploads (contents ignored)
 tests/               Automated server tests
 ```
 
 The first migration creates Store owners, businesses, operating details, menu resources, orders,
 sessions, and Store-scoped audit events. See `docs/data-model.md`.
+
+## Document storage boundary
+
+Verification-file metadata belongs to the Store-owned `business_documents` table. File contents
+live in a private bucket in the same Supabase project as the configured PostgreSQL database. The
+Node server is the only Storage client: it validates the Store session and business ownership,
+uses owner-prefixed random object keys, and proxies authenticated downloads. The service-role key
+never reaches the browser.
+
+The bucket is an explicitly provisioned shared-project resource. Application startup never creates
+or modifies Supabase projects, databases, schemas, buckets, or Storage policies.
 
 ## API contract
 

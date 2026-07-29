@@ -4,6 +4,7 @@ import { createApiRouter } from './api/router.js';
 import { createRequestHandler } from './app.js';
 import { ConfigurationError, loadConfig } from './config.js';
 import { openConfiguredDatabase } from './database/connection.js';
+import { createSupabaseStorage } from './storage/supabase.js';
 
 async function startServer() {
   let config;
@@ -32,7 +33,11 @@ async function startServer() {
 
   const server = createServer(
     createRequestHandler({
-      apiRouter: createApiRouter({ config, database }),
+      apiRouter: createApiRouter({
+        config,
+        database,
+        documentStorage: createSupabaseStorage(config),
+      }),
       healthCheck: () => database.checkHealth(),
     }),
   );

@@ -102,6 +102,7 @@ test('server serves the Store-owner portal and removes the old admin route', asy
   const businessResponse = await request(handler, '/pages/store/business.html');
   const menuResponse = await request(handler, '/pages/store/menu.html');
   const ordersResponse = await request(handler, '/pages/store/orders.html');
+  const documentsResponse = await request(handler, '/pages/store/documents.html');
   const profileResponse = await request(handler, '/pages/store/profile.html');
   const oldAdminResponse = await request(handler, '/pages/admin/dashboard.html');
 
@@ -119,6 +120,9 @@ test('server serves the Store-owner portal and removes the old admin route', asy
   assert.equal(ordersResponse.status, 200);
   assert.match(ordersResponse.body, /Your orders/);
   assert.doesNotMatch(ordersResponse.body, /id="dark-mode-toggle"/);
+  assert.equal(documentsResponse.status, 200);
+  assert.match(documentsResponse.body, /Verification documents/);
+  assert.match(documentsResponse.body, /\/js\/documents\.js/);
   assert.equal(profileResponse.status, 200);
   assert.match(profileResponse.body, /Personal profile/);
   assert.match(profileResponse.body, /Dark mode/);

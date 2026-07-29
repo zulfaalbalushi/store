@@ -20,12 +20,18 @@ const TEST_CONFIG = {
 function performRequest(handler, url, options = {}) {
   return new Promise((resolve, reject) => {
     const requestBody =
-      options.body === undefined ? [] : [Buffer.from(JSON.stringify(options.body))];
+      options.rawBody !== undefined
+        ? [options.rawBody]
+        : options.body === undefined
+          ? []
+          : [Buffer.from(JSON.stringify(options.body))];
     const request = Readable.from(requestBody);
     request.method = options.method || 'GET';
     request.url = url;
     request.headers = {
-      ...(options.body === undefined ? {} : { 'content-type': 'application/json' }),
+      ...(options.body === undefined && options.rawBody === undefined
+        ? {}
+        : { 'content-type': 'application/json' }),
       ...options.headers,
     };
 
@@ -78,10 +84,10 @@ function completeBusiness(overrides = {}) {
   };
 }
 
-async function testApplication() {
+async function testApplication(documentStorage = null) {
   const temporaryDirectory = await mkdtemp(path.join(os.tmpdir(), 'baytna-api-'));
   const database = await openDatabase(path.join(temporaryDirectory, 'test.sqlite'));
-  const apiRouter = createApiRouter({ config: TEST_CONFIG, database });
+  const apiRouter = createApiRouter({ config: TEST_CONFIG, database, documentStorage });
   const handler = createRequestHandler({
     apiRouter,
     healthCheck: () => database.checkHealth(),
@@ -672,6 +678,134 @@ test('Orders API enforces CSRF, transitions, and business ownership', async () =
       { headers: { cookie: cookieFrom(secondRegistration) } },
     );
     assert.equal(crossBusiness.status, 404);
+  } finally {
+    await application.close();
+  }
+});
+
+test('Store document APIs upload validated files and enforce owner-scoped downloads', async () => {
+  const storedObjects = new Map();
+  const documentStorage = {
+    async download(storageKey) {
+      if (!storedObjects.has(storageKey)) throw new Error('Missing object');
+      return storedObjects.get(storageKey);
+    },
+    async remove(storageKey) {
+      storedObjects.delete(storageKey);
+    },
+    async upload(storageKey, contents) {
+      assert.match(storageKey, /^1\/[0-9a-f-]+\.pdf$/);
+      storedObjects.set(storageKey, contents);
+    },
+  };
+  const application = await testApplication(documentStorage);
+
+  try {
+    const firstRegistration = await performRequest(
+      application.handler,
+      '/api/v1/auth/store/register',
+      {
+        method: 'POST',
+        body: {
+          fullName: 'Document Owner',
+          businessName: 'Document Kitchen',
+          email: 'documents@example.com',
+          password: 'strong-password',
+        },
+      },
+    );
+    const firstPayload = json(firstRegistration);
+    const firstCookie = cookieFrom(firstRegistration);
+    const pdf = Buffer.from('%PDF-1.7\nsafe test document');
+
+    const missingCsrf = await performRequest(application.handler, '/api/v1/store/documents', {
+      method: 'POST',
+      rawBody: pdf,
+      headers: {
+        cookie: firstCookie,
+        'content-type': 'application/pdf',
+        'x-document-type': 'business_registration',
+        'x-file-name': encodeURIComponent('registration.pdf'),
+      },
+    });
+    assert.equal(missingCsrf.status, 403);
+
+    const invalidFile = await performRequest(application.handler, '/api/v1/store/documents', {
+      method: 'POST',
+      rawBody: Buffer.from('not a PDF'),
+      headers: {
+        cookie: firstCookie,
+        'content-type': 'application/pdf',
+        'x-csrf-token': firstPayload.data.csrfToken,
+        'x-document-type': 'business_registration',
+        'x-file-name': encodeURIComponent('registration.pdf'),
+      },
+    });
+    assert.equal(invalidFile.status, 422);
+    assert.equal(storedObjects.size, 0);
+
+    const upload = await performRequest(application.handler, '/api/v1/store/documents', {
+      method: 'POST',
+      rawBody: pdf,
+      headers: {
+        cookie: firstCookie,
+        'content-type': 'application/pdf',
+        'x-csrf-token': firstPayload.data.csrfToken,
+        'x-document-type': 'business_registration',
+        'x-file-name': encodeURIComponent('registration.pdf'),
+      },
+    });
+    const uploadedDocument = json(upload).data.document;
+
+    assert.equal(upload.status, 201);
+    assert.equal(uploadedDocument.originalName, 'registration.pdf');
+    assert.equal(uploadedDocument.reviewStatus, 'pending');
+    assert.equal(storedObjects.size, 1);
+
+    const list = await performRequest(application.handler, '/api/v1/store/documents', {
+      headers: { cookie: firstCookie },
+    });
+    assert.equal(list.status, 200);
+    assert.equal(json(list).data.documents.length, 1);
+
+    const ownDownload = await performRequest(
+      application.handler,
+      `/api/v1/store/documents/${uploadedDocument.id}/content`,
+      { headers: { cookie: firstCookie } },
+    );
+    assert.equal(ownDownload.status, 200);
+    assert.equal(ownDownload.headers['Content-Type'], 'application/pdf');
+    assert.match(ownDownload.headers['Content-Disposition'], /registration\.pdf/);
+
+    const secondRegistration = await performRequest(
+      application.handler,
+      '/api/v1/auth/store/register',
+      {
+        method: 'POST',
+        body: {
+          fullName: 'Other Document Owner',
+          businessName: 'Other Document Kitchen',
+          email: 'other-documents@example.com',
+          password: 'strong-password',
+        },
+      },
+    );
+    const crossBusiness = await performRequest(
+      application.handler,
+      `/api/v1/store/documents/${uploadedDocument.id}/content`,
+      { headers: { cookie: cookieFrom(secondRegistration) } },
+    );
+    assert.equal(crossBusiness.status, 404);
+
+    const auditEvent = application.database.get(
+      `SELECT action, business_id, actor_user_id
+       FROM audit_events
+       WHERE resource_type = 'business_document' AND resource_id = ?`,
+      uploadedDocument.id,
+    );
+    assert.equal(auditEvent.action, 'business_document.uploaded');
+    assert.equal(auditEvent.business_id, firstPayload.data.account.businessId);
+    assert.equal(auditEvent.actor_user_id, firstPayload.data.account.userId);
   } finally {
     await application.close();
   }
