@@ -1,4 +1,9 @@
-import { signInStoreOwner, registerStoreOwner } from '../auth/service.js';
+import {
+  signInCustomer,
+  signInStoreOwner,
+  registerCustomer,
+  registerStoreOwner,
+} from '../auth/service.js';
 import { changeOwnedPassword, getOwnedAccount, updateOwnedAccount } from '../account/service.js';
 import { createRateLimiter } from '../auth/rate-limit.js';
 import {
@@ -65,11 +70,35 @@ export function createApiRouter({ config, database, documentStorage = null }) {
       return true;
     }
 
+    if (requestUrl.pathname === '/api/v1/auth/customer/register') {
+      requireMethod(request, 'POST');
+      authenticationRateLimiter.check(request, 'customer-register');
+      const input = await readJsonBody(request);
+      const result = await registerCustomer(database, input, config.sessionSecret);
+
+      sendSuccess(response, accountPayload(result), 201, {
+        'Set-Cookie': sessionCookie(result.session.token, isProduction),
+      });
+      return true;
+    }
+
     if (requestUrl.pathname === '/api/v1/auth/store/sign-in') {
       requireMethod(request, 'POST');
       authenticationRateLimiter.check(request, 'store-sign-in');
       const input = await readJsonBody(request);
       const result = await signInStoreOwner(database, input, config.sessionSecret);
+
+      sendSuccess(response, accountPayload(result), 200, {
+        'Set-Cookie': sessionCookie(result.session.token, isProduction),
+      });
+      return true;
+    }
+
+    if (requestUrl.pathname === '/api/v1/auth/customer/sign-in') {
+      requireMethod(request, 'POST');
+      authenticationRateLimiter.check(request, 'customer-sign-in');
+      const input = await readJsonBody(request);
+      const result = await signInCustomer(database, input, config.sessionSecret);
 
       sendSuccess(response, accountPayload(result), 200, {
         'Set-Cookie': sessionCookie(result.session.token, isProduction),

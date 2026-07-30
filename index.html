@@ -1,63 +1,17 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Baytna — Real Omani food, made at home</title>
-  <link rel="stylesheet" href="/css/style.css">
-  <link rel="stylesheet" href="/css/components.css">
-  <!-- Home-page-only sections (hero, category row, popular dishes) -->
-  <link rel="stylesheet" href="/css/home.css">
-</head>
-<body>
-  <!-- Shared navbar, loaded at runtime by js/include.js -->
-  <div data-include="/pages/partials/navbar.html"></div>
-
-  <main>
-    <!-- 1. Hero: headline + CTA on the left, photo placeholder on the right -->
-    <section class="hero">
-      <div class="container hero__inner">
-        <div class="hero__content">
-          <h1>Taste the love in every home-cooked bite</h1>
-          <p>Order authentic Omani dishes made by local home stores.</p>
-          <a href="/pages/dishes.html" class="btn-primary">Browse dishes</a>
-        </div>
-        <div class="hero__media">
-          <img class="hero__photo" src="/images/hero-spread.jpg" alt="A spread of homemade Omani dishes">
-        </div>
-      </div>
-    </section>
-
-    <!-- 2. Category row: visual only for now, filtering lives on the Dishes page -->
-    <section class="category-row">
-      <div class="container category-row__inner">
-        <button type="button" class="chip active">All</button>
-        <button type="button" class="chip">Mains</button>
-        <button type="button" class="chip">Sweets</button>
-        <button type="button" class="chip">Bread</button>
-        <button type="button" class="chip">Drinks</button>
-      </div>
-    </section>
-
-    <!-- 3. Popular this week: first 4 sample dishes rendered via createDishCard() -->
-    <section class="popular">
-      <div class="container">
-        <h2>Popular this week</h2>
-        <div class="grid" id="popular-dish-grid"></div>
-      </div>
-    </section>
-  </main>
-
-  <!-- Shared footer, loaded at runtime by js/include.js -->
-  <div data-include="/pages/partials/footer.html"></div>
-
-  <script src="/js/sampleDishes.js"></script>
-  <script src="/js/dishCard.js"></script>
-  <script src="/js/include.js"></script>
-  <script>
-    // Only show the first 4 dishes on the homepage teaser grid
-    document.getElementById('popular-dish-grid').innerHTML =
-      sampleDishes.slice(0, 4).map(createDishCard).join('');
-  </script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="refresh" content="0; url=/pages/store/login.html" />
+    <title>Baytna</title>
+    <script>
+      window.location.replace('/pages/store/login.html');
+    </script>
+  </head>
+  <body>
+    <p>
+      Redirecting to <a href="/pages/store/login.html">Baytna sign in</a>...
+    </p>
+  </body>
 </html>

@@ -235,7 +235,7 @@
         name: isSignup ? fullNameInput.value.trim() : '',
       }),
     );
-    window.location.assign('/pages/customer-placeholder.html');
+    window.location.assign('/pages/stores.html');
   });
 
   setMode('signin');

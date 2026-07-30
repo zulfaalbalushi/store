@@ -159,27 +159,66 @@
   <div data-include="/pages/partials/footer.html"></div>
 
   <script src="/js/include.js" defer></script>
+  <script src="/js/customer.js"></script>
   <script>
-    // Cart quantity, remove, and totals logic.
-    // Reads price/quantity straight from the DOM (data attributes) so this
-    // works as a standalone demo; swap the DOM reads for your real cart
-    // state/API once the backend is wired up.
     (function () {
-      const DELIVERY_FEE = 1.0;
-
       const filledState = document.getElementById('cart-filled-state');
       const emptyState = document.getElementById('cart-empty-state');
       const itemsContainer = document.getElementById('cart-items');
       const subtotalEl = document.getElementById('summary-subtotal');
       const deliveryEl = document.getElementById('summary-delivery');
       const totalEl = document.getElementById('summary-total');
+      const checkoutBtn = document.getElementById('checkout-btn');
 
       function formatPrice(amount) {
         return `OMR ${amount.toFixed(3)}`;
       }
 
-      function getItems() {
-        return Array.from(itemsContainer.querySelectorAll('.cart-item'));
+      function renderCart() {
+        const cart = window.BaytnaCustomer ? window.BaytnaCustomer.readCart() : [];
+
+        itemsContainer.replaceChildren();
+
+        if (cart.length === 0) {
+          filledState.hidden = true;
+          emptyState.hidden = false;
+          return;
+        }
+
+        const totals = window.BaytnaCustomer.cartTotals(cart);
+        subtotalEl.textContent = formatPrice(totals.subtotal);
+        deliveryEl.textContent = formatPrice(1);
+        totalEl.textContent = formatPrice(totals.total);
+
+        cart.forEach((item) => {
+          const article = document.createElement('article');
+          article.className = 'card cart-item';
+          article.dataset.unitPrice = String(item.unit_price.toFixed(3));
+          article.dataset.lineId = String(item.listing_id);
+
+          article.innerHTML = `
+            <img class="cart-item-image" src="${item.image || '../images/dishes/chicken-majboos.jpg'}" alt="${item.name}">
+            <div>
+              <h2 class="cart-item-name">${item.name}</h2>
+              <p class="cart-item-cook">${item.store ? `By ${item.store}` : 'Baytna'}</p>
+              <p class="cart-item-unit-price">OMR ${item.unit_price.toFixed(3)} each</p>
+            </div>
+            <div class="cart-item-controls">
+              <span class="cart-item-line-price" data-line-price>OMR ${(item.unit_price * item.quantity).toFixed(3)}</span>
+              <div class="quantity-selector">
+                <button type="button" class="quantity-btn" data-qty-decrease aria-label="Decrease quantity of ${item.name}">&minus;</button>
+                <span class="quantity-value" data-qty-value aria-live="polite">${item.quantity}</span>
+                <button type="button" class="quantity-btn" data-qty-increase aria-label="Increase quantity of ${item.name}">+</button>
+              </div>
+              <button type="button" class="cart-item-remove" data-remove-item>Remove</button>
+            </div>
+          `;
+
+          itemsContainer.append(article);
+        });
+
+        filledState.hidden = false;
+        emptyState.hidden = true;
       }
 
       function updateLineItem(itemEl) {
@@ -189,37 +228,30 @@
       }
 
       function updateSummary() {
-        const items = getItems();
-
-        if (items.length === 0) {
+        const cart = window.BaytnaCustomer ? window.BaytnaCustomer.readCart() : [];
+        if (cart.length === 0) {
           filledState.hidden = true;
           emptyState.hidden = false;
           return;
         }
 
-        filledState.hidden = false;
-        emptyState.hidden = true;
-
-        const subtotal = items.reduce((sum, itemEl) => {
-          const unitPrice = parseFloat(itemEl.dataset.unitPrice);
-          const qty = parseInt(itemEl.querySelector('[data-qty-value]').textContent, 10);
-          return sum + unitPrice * qty;
-        }, 0);
-
-        const total = subtotal + DELIVERY_FEE;
-
-        subtotalEl.textContent = formatPrice(subtotal);
-        deliveryEl.textContent = formatPrice(DELIVERY_FEE);
-        totalEl.textContent = formatPrice(total);
+        const totals = window.BaytnaCustomer.cartTotals(cart);
+        subtotalEl.textContent = formatPrice(totals.subtotal);
+        deliveryEl.textContent = formatPrice(1);
+        totalEl.textContent = formatPrice(totals.total);
       }
 
       itemsContainer.addEventListener('click', (event) => {
         const itemEl = event.target.closest('.cart-item');
         if (!itemEl) return;
+        const listingId = Number(itemEl.dataset.lineId);
 
         if (event.target.matches('[data-qty-increase]')) {
           const qtyEl = itemEl.querySelector('[data-qty-value]');
           qtyEl.textContent = parseInt(qtyEl.textContent, 10) + 1;
+          if (window.BaytnaCustomer) {
+            window.BaytnaCustomer.setCartQuantity(listingId, parseInt(qtyEl.textContent, 10));
+          }
           updateLineItem(itemEl);
           updateSummary();
         }
@@ -229,18 +261,31 @@
           const current = parseInt(qtyEl.textContent, 10);
           if (current > 1) {
             qtyEl.textContent = current - 1;
+            if (window.BaytnaCustomer) {
+              window.BaytnaCustomer.setCartQuantity(listingId, current - 1);
+            }
             updateLineItem(itemEl);
             updateSummary();
           }
         }
 
         if (event.target.matches('[data-remove-item]')) {
+          if (window.BaytnaCustomer) {
+            window.BaytnaCustomer.removeFromCart(listingId);
+          }
           itemEl.remove();
           updateSummary();
+          renderCart();
         }
       });
 
-      updateSummary();
+      checkoutBtn.addEventListener('click', () => {
+        if (!window.BaytnaCustomer || window.BaytnaCustomer.readCart().length === 0) {
+          checkoutBtn.href = 'dishes.html';
+        }
+      });
+
+      renderCart();
     })();
   </script>
 

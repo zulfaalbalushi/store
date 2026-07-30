@@ -193,32 +193,22 @@
   <div data-include="/pages/partials/footer.html"></div>
 
   <script src="/js/include.js" defer></script>
+  <script src="../js/customer.js"></script>
   <script src="../js/dishCard.js"></script>
   <script>
-    // "You might also like" cards, rendered through the shared
-    // createDishCard() component (js/dishCard.js) so they match the dish
-    // cards used elsewhere on the site. Real photos/names/prices/stores
-    // carried over from the previous hand-written markup.
     (function () {
-      const relatedDishes = [
-        { id: 'shuwa', name: 'Shuwa', store: 'Salim Al-Farsi', price: 6.250, image: '../images/dishes/shuwa.jpg', category: 'Mains', isAvailable: true },
-        { id: 'harees', name: 'Harees', store: 'Mariam Al-Balushi', price: 2.800, image: '../images/dishes/harees.jpg', category: 'Mains', isAvailable: true },
-        { id: 'luqaimat', name: 'Luqaimat', store: 'Aisha Al-Kindi', price: 1.800, image: '../images/dishes/luqaimat.jpg', category: 'Sweets', isAvailable: true },
-        { id: 'matcha', name: 'Matcha', store: 'Salim Al-Farsi', price: 1.500, image: '../images/dishes/matcha.jpg', category: 'Drinks', isAvailable: true },
-        { id: 'cookies', name: 'Cookies', store: 'Aisha Al-Kindi', price: 1.200, image: '../images/dishes/cookies.jpg', category: 'Sweets', isAvailable: true },
-      ];
-
-      document.getElementById('related-dishes-grid').innerHTML = relatedDishes.map(createDishCard).join('');
-    })();
-  </script>
-  <script>
-    // Quantity selector + Add to Cart price sync.
-    // Keeps the button label in sync with unit price × quantity so the
-    // customer always sees the total they're about to add before they click.
-    (function () {
-      const UNIT_PRICE = 3.5;
       const MIN_QTY = 1;
       const MAX_QTY = 20;
+      const fallbackImage = '../images/dishes/chicken-majboos.jpg';
+      const params = new URLSearchParams(window.location.search);
+      const listingId = params.get('listing_id');
+
+      const titleEl = document.querySelector('.dish-title');
+      const priceEl = document.querySelector('.dish-price');
+      const imageEl = document.querySelector('.dish-hero-image');
+      const cookNameEl = document.querySelector('.dish-cook-name');
+      const breadcrumbEl = document.querySelector('.breadcrumb-current');
+      const relatedGrid = document.getElementById('related-dishes-grid');
 
       const qtyValueEl = document.getElementById('qty-value');
       const decreaseBtn = document.getElementById('qty-decrease');
@@ -226,16 +216,75 @@
       const addToCartBtn = document.getElementById('add-to-cart-btn');
 
       let quantity = MIN_QTY;
+      let currentListing = null;
 
       function formatPrice(amount) {
         return `OMR ${amount.toFixed(3)}`;
       }
 
       function render() {
+        const unitPrice = currentListing ? Number(currentListing.price) : 0;
         qtyValueEl.textContent = quantity;
         decreaseBtn.disabled = quantity <= MIN_QTY;
         increaseBtn.disabled = quantity >= MAX_QTY;
-        addToCartBtn.textContent = `Add to Cart — ${formatPrice(UNIT_PRICE * quantity)}`;
+        addToCartBtn.textContent = `Add to Cart — ${formatPrice(unitPrice * quantity)}`;
+      }
+
+      function listingToDishCard(listing) {
+        return {
+          category: 'All',
+          id: listing.listing_id,
+          image: listing.image_url,
+          isAvailable: true,
+          link: `/pages/dish-detail.html?listing_id=${encodeURIComponent(listing.listing_id)}`,
+          name: listing.listing_name,
+          price: listing.price,
+          store: listing.store_name,
+        };
+      }
+
+      function renderListing(listing) {
+        currentListing = listing;
+
+        document.title = `${listing.listing_name} | Baytna`;
+        titleEl.textContent = listing.listing_name;
+        priceEl.textContent = formatPrice(Number(listing.price));
+        imageEl.src = listing.image_url || fallbackImage;
+        imageEl.alt = listing.listing_name;
+        cookNameEl.textContent = listing.store_name;
+        cookNameEl.href = 'stores.html';
+        breadcrumbEl.textContent = listing.listing_name;
+        qtyValueEl.textContent = quantity;
+        render();
+      }
+
+      async function loadListing() {
+        try {
+          const listings = await window.BaytnaCustomer.request('/listings');
+          const list = Array.isArray(listings) ? listings : [];
+          const listing = list.find((entry) => String(entry.listing_id) === String(listingId)) || list[0];
+
+          if (!listing) {
+            relatedGrid.innerHTML = '';
+            relatedGrid.insertAdjacentHTML(
+              'beforebegin',
+              '<p class="cooks-empty">No listings are available right now.</p>',
+            );
+            addToCartBtn.disabled = true;
+            return;
+          }
+
+          renderListing(listing);
+
+          const relatedDishes = list
+            .filter((entry) => String(entry.listing_id) !== String(listing.listing_id))
+            .slice(0, 5)
+            .map(listingToDishCard);
+
+          relatedGrid.innerHTML = relatedDishes.map(createDishCard).join('');
+        } catch {
+          addToCartBtn.disabled = true;
+        }
       }
 
       decreaseBtn.addEventListener('click', () => {
@@ -253,13 +302,21 @@
       });
 
       addToCartBtn.addEventListener('click', () => {
-        // TODO: replace with real cart integration (e.g. shared cart.js module).
-        console.log(`Added ${quantity} × Chicken Majboos to cart.`);
+        if (window.BaytnaCustomer && currentListing) {
+          window.BaytnaCustomer.addToCart({
+            image: currentListing.image_url || fallbackImage,
+            listing_id: currentListing.listing_id,
+            name: currentListing.listing_name,
+            quantity,
+            store: currentListing.store_name,
+            unit_price: Number(currentListing.price),
+          });
+        }
         addToCartBtn.textContent = 'Added ✓';
         setTimeout(render, 1200);
       });
 
-      render();
+      loadListing();
     })();
   </script>
 

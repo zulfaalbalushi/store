@@ -117,11 +117,45 @@
   <div data-include="/pages/partials/footer.html"></div>
 
   <script src="/js/include.js" defer></script>
+  <script src="/js/customer.js"></script>
   <script>
-    // Highlight the selected payment option (radio inputs don't get a
-    // visual state of their own here — the wrapping label does).
     (function () {
       const paymentOptions = document.querySelectorAll('.payment-option');
+      const form = document.getElementById('checkout-form');
+      const itemsContainer = document.querySelector('.checkout-summary-items');
+      const subtotalEl = document.querySelector('.order-summary-row.is-muted span:last-child');
+      const deliveryEl = document.querySelectorAll('.order-summary-row.is-muted span:last-child')[1];
+      const totalEl = document.querySelector('.order-summary-total span:last-child');
+
+      function formatPrice(amount) {
+        return `OMR ${amount.toFixed(3)}`;
+      }
+
+      function renderSummary() {
+        const cart = window.BaytnaCustomer ? window.BaytnaCustomer.readCart() : [];
+
+        if (cart.length === 0) {
+          window.location.replace('/pages/cart.html');
+          return;
+        }
+
+        itemsContainer.replaceChildren();
+
+        cart.forEach((item) => {
+          const row = document.createElement('div');
+          row.className = 'checkout-summary-item';
+          row.innerHTML = `
+            <span><span class="checkout-summary-item-qty">${item.quantity}×</span> ${item.name}</span>
+            <span>${formatPrice(item.unit_price * item.quantity)}</span>
+          `;
+          itemsContainer.append(row);
+        });
+
+        const totals = window.BaytnaCustomer.cartTotals(cart);
+        subtotalEl.textContent = formatPrice(totals.subtotal);
+        deliveryEl.textContent = formatPrice(1);
+        totalEl.textContent = formatPrice(totals.total);
+      }
 
       paymentOptions.forEach((option) => {
         option.addEventListener('click', () => {
@@ -130,18 +164,24 @@
         });
       });
 
-      // On submit, go to the confirmation page.
-      // TODO: replace with a real order-creation API call; only navigate
-      // once that call succeeds.
-      const form = document.getElementById('checkout-form');
-      form.addEventListener('submit', (event) => {
+      form.addEventListener('submit', async (event) => {
         event.preventDefault();
-        if (form.checkValidity()) {
-          window.location.href = 'order-confirmation.html';
-        } else {
+        if (!form.checkValidity()) {
           form.reportValidity();
+          return;
+        }
+
+        try {
+          const order = await window.BaytnaCustomer.createOrder();
+          window.BaytnaCustomer.clearCart();
+          const orderId = order.order?.id ?? order.order?.order_id ?? order.id ?? order.order_id;
+          window.location.href = `order-confirmation.html?orderId=${encodeURIComponent(orderId)}`;
+        } catch (error) {
+          alert(error.message || 'Unable to place order.');
         }
       });
+
+      renderSummary();
     })();
   </script>
 

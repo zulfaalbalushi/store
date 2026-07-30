@@ -51,6 +51,28 @@
   <div data-include="/pages/partials/footer.html"></div>
 
   <script src="/js/include.js" defer></script>
+  <script src="/js/customer.js"></script>
+  <script>
+    (function () {
+      const params = new URLSearchParams(window.location.search);
+      const orderId = params.get('orderId');
+      const orderNumberEl = document.querySelector('.confirmation-detail-value');
+      const statusEl = document.querySelector('.confirmation-details .badge');
+      const deliveryEl = document.querySelectorAll('.confirmation-detail-value')[1];
+
+      if (!orderId) return;
+
+      window.BaytnaCustomer.request(`/orders/${encodeURIComponent(orderId)}`)
+        .then((order) => {
+          orderNumberEl.textContent = `#${order.order_number ?? order.orderNumber ?? order.id}`;
+          statusEl.textContent = order.status ? order.status[0].toUpperCase() + order.status.slice(1) : 'Preparing';
+          if (deliveryEl) {
+            deliveryEl.textContent = order.estimated_delivery || '40 minutes';
+          }
+        })
+        .catch(() => {});
+    })();
+  </script>
 
 </body>
 </html>

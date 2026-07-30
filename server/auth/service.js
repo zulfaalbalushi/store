@@ -10,7 +10,7 @@ function normalizedEmail(value) {
   return typeof value === 'string' ? value.trim().toLowerCase() : '';
 }
 
-function validateCredentials(input, requireRegistrationFields) {
+function validateCredentials(input, { requireFullName = false, requireBusinessName = false } = {}) {
   const errors = {};
   const email = normalizedEmail(input.email);
   const password = typeof input.password === 'string' ? input.password : '';
@@ -25,11 +25,11 @@ function validateCredentials(input, requireRegistrationFields) {
     errors.password = 'Password must contain between 8 and 128 characters.';
   }
 
-  if (requireRegistrationFields && (fullName.length < 2 || fullName.length > 100)) {
+  if (requireFullName && (fullName.length < 2 || fullName.length > 100)) {
     errors.fullName = 'Full name must contain between 2 and 100 characters.';
   }
 
-  if (requireRegistrationFields && (businessName.length < 2 || businessName.length > 120)) {
+  if (requireBusinessName && (businessName.length < 2 || businessName.length > 120)) {
     errors.businessName = 'Business name must contain between 2 and 120 characters.';
   }
 
@@ -41,7 +41,7 @@ function validateCredentials(input, requireRegistrationFields) {
 }
 
 export async function registerStoreOwner(database, input, sessionSecret) {
-  const values = validateCredentials(input, true);
+  const values = validateCredentials(input, { requireFullName: true, requireBusinessName: true });
 
   if (await database.get('SELECT id FROM users WHERE email = ?', values.email)) {
     throw conflict('An account with this email already exists.');
@@ -85,7 +85,7 @@ export async function registerStoreOwner(database, input, sessionSecret) {
 }
 
 export async function signInStoreOwner(database, input, sessionSecret) {
-  const values = validateCredentials(input, false);
+  const values = validateCredentials(input);
   const user = await database.get(
     `SELECT users.id, users.email, users.password_hash, users.full_name,
       businesses.id AS business_id, businesses.name AS business_name
@@ -105,6 +105,60 @@ export async function signInStoreOwner(database, input, sessionSecret) {
       businessName: user.business_name,
       email: user.email,
       fullName: user.full_name,
+      userId: user.id,
+    },
+    session: await createSession(database, user.id, sessionSecret),
+  };
+}
+
+export async function registerCustomer(database, input, sessionSecret) {
+  const values = validateCredentials(input, { requireFullName: true });
+
+  if (await database.get('SELECT id FROM users WHERE email = ?', values.email)) {
+    throw conflict('An account with this email already exists.');
+  }
+
+  const passwordHash = await argon2.hash(values.password, {
+    type: argon2.argon2id,
+  });
+
+  const account = await database.insert(
+    `INSERT INTO users (role, email, password_hash, full_name)
+     VALUES ('customer', ?, ?, ?)` ,
+    values.email,
+    passwordHash,
+    values.fullName,
+  );
+
+  return {
+    account: {
+      email: values.email,
+      fullName: values.fullName,
+      role: 'customer',
+      userId: account,
+    },
+    session: await createSession(database, account, sessionSecret),
+  };
+}
+
+export async function signInCustomer(database, input, sessionSecret) {
+  const values = validateCredentials(input);
+  const user = await database.get(
+    `SELECT id, email, password_hash, full_name
+     FROM users
+     WHERE email = ? AND role = 'customer'`,
+    values.email,
+  );
+
+  if (!user || !(await argon2.verify(user.password_hash, values.password))) {
+    throw unauthorized('Email or password is incorrect.');
+  }
+
+  return {
+    account: {
+      email: user.email,
+      fullName: user.full_name,
+      role: 'customer',
       userId: user.id,
     },
     session: await createSession(database, user.id, sessionSecret),
